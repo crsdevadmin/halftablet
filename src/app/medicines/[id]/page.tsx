@@ -58,12 +58,12 @@ export default function ProductDetailPage() {
           <span className="text-xs font-bold text-brand-blue uppercase tracking-widest">{medicine.category}</span>
           <h1 className="font-display font-bold text-3xl text-brand-dark leading-tight">{medicine.name}</h1>
           <p className="text-brand-slate">{medicine.genericName} · {medicine.manufacturer}</p>
-          <p className="text-xs text-gray-400">Salt: {medicine.saltComposition}</p>
+          <p className="text-xs text-faint">Salt: {medicine.saltComposition}</p>
 
           {/* Rating */}
           <div className="flex items-center gap-2">
             {[1,2,3,4,5].map(s => (
-              <Star key={s} size={16} className={s <= Math.round(medicine.rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'} />
+              <Star key={s} size={16} className={s <= Math.round(medicine.rating) ? 'fill-amber-400 text-amber-400' : 'text-faint'} />
             ))}
             <span className="font-semibold text-sm">{medicine.rating}</span>
             <span className="text-brand-slate text-sm">({medicine.reviewCount} reviews)</span>
@@ -73,7 +73,7 @@ export default function ProductDetailPage() {
           <div className="flex flex-wrap gap-2">
             {medicine.requiresPrescription && <span className="badge-rx"><FileText size={12} /> Prescription Required</span>}
             {medicine.coldChain && <span className="badge-cold"><Snowflake size={12} /> Cold-Chain Delivery</span>}
-            <span className={`text-sm font-semibold ${medicine.inStock ? 'text-green-600' : 'text-red-500'}`}>
+            <span className={`text-sm font-semibold ${medicine.inStock ? 'text-accent' : 'text-danger'}`}>
               {medicine.inStock ? '● In Stock' : '● Out of Stock'}
             </span>
           </div>
@@ -92,7 +92,7 @@ export default function ProductDetailPage() {
           {/* Prescription upload notice */}
           {medicine.requiresPrescription && (
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <FileText size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+              <FileText size={18} className="text-warning flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-amber-800">Prescription Required</p>
                 <p className="text-xs text-amber-700 mt-0.5">You can upload it at checkout. Our pharmacist will verify within 2–4 hours.</p>
@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
 
           {/* Quantity + Cart */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center border border-border rounded-xl overflow-hidden">
               <button onClick={() => setQty(q => Math.max(1, q - 1))}
                 className="w-10 h-12 text-brand-dark hover:bg-brand-ice transition-colors font-bold text-lg">−</button>
               <span className="w-10 text-center font-semibold text-brand-dark">{qty}</span>
@@ -134,7 +134,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-border mb-6">
         <div className="flex gap-1 overflow-x-auto">
           {TABS.map(t => (
             <button key={t} onClick={() => setTab(t)}
@@ -179,7 +179,7 @@ export default function ProductDetailPage() {
             {[
               { level: 'Common', icon: <AlertTriangle size={16} className="text-amber-500" />, bg: 'bg-amber-50', items: medicine.sideEffects.common },
               { level: 'Serious', icon: <AlertTriangle size={16} className="text-orange-500" />, bg: 'bg-orange-50', items: medicine.sideEffects.serious },
-              { level: 'Emergency — Call 112', icon: <AlertOctagon size={16} className="text-red-600" />, bg: 'bg-red-50', items: medicine.sideEffects.emergency },
+              { level: 'Emergency — Call 112', icon: <AlertOctagon size={16} className="text-danger" />, bg: 'bg-red-50', items: medicine.sideEffects.emergency },
             ].map(({ level, icon, bg, items }) => (
               <div key={level} className={`${bg} rounded-xl p-4`}>
                 <div className="flex items-center gap-2 mb-2">
@@ -213,7 +213,7 @@ export default function ProductDetailPage() {
               <div className="text-center">
                 <p className="font-display font-bold text-5xl text-brand-dark">{medicine.rating}</p>
                 <div className="flex gap-0.5 mt-1 justify-center">
-                  {[1,2,3,4,5].map(s => <Star key={s} size={14} className={s <= Math.round(medicine.rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'} />)}
+                  {[1,2,3,4,5].map(s => <Star key={s} size={14} className={s <= Math.round(medicine.rating) ? 'fill-amber-400 text-amber-400' : 'text-faint'} />)}
                 </div>
                 <p className="text-xs text-brand-slate mt-1">{medicine.reviewCount} reviews</p>
               </div>

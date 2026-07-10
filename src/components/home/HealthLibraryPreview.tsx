@@ -31,7 +31,7 @@ export function HealthLibraryPreview() {
                 {article.title}
               </h3>
               <p className="text-xs text-brand-slate line-clamp-2 mb-3 flex-1">{article.excerpt}</p>
-              <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
+              <div className="flex items-center justify-between text-xs text-faint mt-auto">
                 <span>{article.author}</span>
                 <span className="flex items-center gap-1"><Clock size={11} /> {article.readTime} min</span>
               </div>

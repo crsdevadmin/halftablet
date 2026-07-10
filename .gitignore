@@ -27,3 +27,6 @@ Thumbs.db
 
 # local review artifacts
 .doc_review/
+
+# uploaded prescriptions (dev-mode local storage)
+uploads/

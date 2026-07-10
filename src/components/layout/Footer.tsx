@@ -32,7 +32,7 @@ const links = {
 
 export function Footer() {
   return (
-    <footer className="bg-brand-dark text-gray-400 mt-20">
+    <footer className="bg-brand-dark text-faint mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Brand */}
@@ -71,7 +71,7 @@ export function Footer() {
 
         {/* Trust badges */}
         <div className="border-t border-gray-700 pt-8 mb-8">
-          <div className="flex flex-wrap gap-6 justify-center text-xs text-gray-500">
+          <div className="flex flex-wrap gap-6 justify-center text-xs text-muted">
             {['✓ CDSCO Licensed', '✓ ISO 9001:2015', '✓ Cold-Chain Certified', '✓ 100% Genuine Medicines', '✓ DPDP Compliant'].map(b => (
               <span key={b} className="font-medium">{b}</span>
             ))}
@@ -79,7 +79,7 @@ export function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-600">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted">
           <p>© 2026 DrMed Pharmacy Pvt. Ltd. All rights reserved.</p>
           <p className="text-center">
             Medicines shown are for informational purposes. Always consult a doctor before taking any medication.

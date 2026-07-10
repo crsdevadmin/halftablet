@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function HeroSection() {
   return (
-    <section className="bg-gradient-to-br from-brand-blue via-blue-700 to-blue-900 text-white">
+    <section className="bg-gradient-to-br from-teal-700 via-teal-800 to-slate-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left content */}
@@ -14,16 +14,16 @@ export function HeroSection() {
             </span>
             <h1 className="font-display font-bold text-4xl md:text-5xl leading-tight mb-4">
               Your Medicine.<br />
-              <span className="text-brand-orange">Delivered with Care.</span>
+              <span className="text-orange-400">Delivered with Care.</span>
             </h1>
-            <p className="text-blue-100 text-lg mb-8 leading-relaxed">
+            <p className="text-teal-100 text-lg mb-8 leading-relaxed">
               5,000+ specialty medicines for cancer, kidney, HIV & more.
               Up to <strong className="text-white">85% off</strong> with AI-powered search.
               Pan-India delivery.
             </p>
 
             {/* Search */}
-            <div className="bg-white rounded-2xl p-2 mb-6">
+            <div className="bg-surface rounded-2xl p-2 mb-6">
               <SearchBar large />
             </div>
 
@@ -36,7 +36,7 @@ export function HeroSection() {
               </Link>
               <button
                 data-ai-open="true"
-                className="flex items-center gap-2 bg-brand-orange hover:bg-orange-600
+                className="flex items-center gap-2 bg-cta hover:brightness-110
                            text-white font-semibold px-5 py-3 rounded-xl text-sm transition-all shadow-ai">
                 <MessageCircle size={16} /> Ask DrMed AI
               </button>

@@ -4,64 +4,139 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Design tokens — every color in the app flows through these CSS variables.
+   Change a value here (or add a .dark override) and the whole UI re-themes.
+   Values are RGB triplets so Tailwind opacity modifiers (e.g. text-muted/70)
+   keep working.
+--------------------------------------------------------------------------- */
+:root {
+  /* Surfaces */
+  --bg:         247 248 250;   /* page background */
+  --surface:    255 255 255;   /* cards, header, dropdowns */
+  --surface-2:  241 245 247;   /* subtle fills, input backgrounds */
+  --border:     228 233 238;
+
+  /* Text */
+  --fg:          20 38 52;     /* headings / primary text (deep teal-navy) */
+  --muted:       89 108 124;   /* secondary text */
+  --faint:      156 170 182;   /* tertiary text, placeholders */
+
+  /* Brand */
+  --primary:      15 118 110;  /* deep medical teal — trust, links, nav */
+  --primary-soft: 230 245 243; /* tinted hover/selected backgrounds */
+  --cta:         234 88 12;    /* warm orange — Add to Cart, checkout */
+  --accent:       5 150 105;   /* green — savings, success, in stock */
+  --danger:     220 38 38;
+  --warning:    217 119 6;
+
+  --ring: 15 118 110;
+}
+
+.dark {
+  --bg:          13 18 24;
+  --surface:     22 30 38;
+  --surface-2:   32 42 52;
+  --border:      45 57 69;
+
+  --fg:         230 237 243;
+  --muted:      150 165 178;
+  --faint:      108 122 136;
+
+  --primary:      45 212 191;
+  --primary-soft: 19 47 46;
+  --cta:         249 115 22;
+  --accent:       52 211 153;
+  --danger:     248 113 113;
+  --warning:    251 191 36;
+
+  --ring: 45 212 191;
+}
+
+/* Elder-friendly ("easy-read") mode — toggled via .elder on <html>.
+   rem-based sizing means bumping the root font-size scales the whole UI. */
+.elder {
+  font-size: 115%;
+  --muted: 63 82 99;    /* darker secondary text for contrast */
+  --faint: 110 128 144;
+}
+.elder.dark {
+  --muted: 178 192 204;
+  --faint: 140 155 170;
+}
+.elder body { line-height: 1.65; }
+.elder button, .elder a { min-height: 44px; } /* comfortable tap targets */
+.elder :focus-visible { @apply ring-4; }
+
 @layer base {
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { @apply font-sans text-brand-dark bg-white antialiased; }
+  body { @apply font-sans text-fg bg-bg antialiased; }
   h1,h2,h3,h4,h5,h6 { @apply font-display; }
+
+  /* Visible focus for keyboard users, invisible for mouse users */
+  :focus-visible { @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-bg rounded; }
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-brand-orange hover:bg-orange-600 active:bg-orange-700 text-white font-semibold
-           px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg
-           focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2
-           disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-secondary {
-    @apply bg-brand-blue hover:bg-blue-700 text-white font-semibold
-           px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg
-           focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2;
-  }
-  .btn-outline {
-    @apply border-2 border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white
-           font-semibold px-6 py-3 rounded-xl transition-all duration-200;
-  }
-  .btn-ghost {
-    @apply text-brand-slate hover:text-brand-blue hover:bg-brand-ice
-           font-medium px-4 py-2 rounded-lg transition-all duration-200;
-  }
   .card {
-    @apply bg-white rounded-xl shadow-card hover:shadow-hover transition-shadow duration-300 border border-gray-100;
+    @apply bg-surface rounded-xl shadow-card hover:shadow-hover transition-shadow duration-300 border border-border;
   }
   .badge-rx {
     @apply inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full
-           bg-amber-100 text-amber-700 border border-amber-200;
+           bg-warning/10 text-warning border border-warning/30;
   }
   .badge-discount {
-    @apply inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full bg-brand-teal text-white;
+    @apply inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full bg-accent text-white;
   }
   .badge-cold {
     @apply inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full
-           bg-blue-100 text-blue-700 border border-blue-200;
+           bg-primary-soft text-primary border border-primary/20;
   }
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-brand-grey text-brand-dark
-           placeholder-brand-slate focus:outline-none focus:ring-2 focus:ring-brand-blue
+    @apply w-full px-4 py-3 rounded-xl border border-border bg-surface-2 text-fg
+           placeholder-faint focus:outline-none focus:ring-2 focus:ring-primary
            focus:border-transparent transition-all duration-200 text-sm;
   }
-  .section-heading { @apply font-display font-bold text-2xl md:text-3xl text-brand-dark; }
-  .price-display { @apply font-display font-bold text-2xl text-brand-blue; }
-  .mrp-display { @apply text-sm text-brand-slate line-through; }
+  .section-heading { @apply font-display font-bold text-2xl md:text-3xl text-fg; }
+  .price-display { @apply font-display font-bold text-2xl text-fg; }
+  .mrp-display { @apply text-sm text-faint line-through; }
+
+  /* Legacy button classes — kept so untouched pages still render.
+     New code should use <Button> from components/ui. */
+  .btn-primary {
+    @apply bg-cta hover:brightness-110 active:brightness-95 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-primary hover:brightness-110 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white
+           font-semibold px-6 py-3 rounded-xl transition-all duration-200;
+  }
+  .btn-ghost {
+    @apply text-muted hover:text-primary hover:bg-primary-soft
+           font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { @apply bg-gray-100; }
-::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-brand-slate; }
+::-webkit-scrollbar-track { background: rgb(var(--surface-2)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--faint)); }
 
 .ai-bubble { animation: aiPulse 2.5s ease-in-out infinite; }
 @keyframes aiPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.4); }
-  50%       { box-shadow: 0 0 0 12px rgba(255,107,53,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--cta) / 0.4); }
+  50%      { box-shadow: 0 0 0 12px rgb(var(--cta) / 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

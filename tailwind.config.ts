@@ -1,6 +1,14 @@
 import type { Config } from 'tailwindcss'
 
+/**
+ * All colors resolve to CSS variables defined in globals.css.
+ * `brand.*` names are aliases kept for backward compatibility —
+ * existing markup re-themes (including dark mode) automatically.
+ */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`
+
 const config: Config = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,26 +17,39 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        bg:        v('bg'),
+        surface:   { DEFAULT: v('surface'), 2: v('surface-2') },
+        border:    v('border'),
+        fg:        v('fg'),
+        muted:     v('muted'),
+        faint:     v('faint'),
+        primary:   { DEFAULT: v('primary'), soft: v('primary-soft') },
+        cta:       v('cta'),
+        accent:    v('accent'),
+        danger:    v('danger'),
+        warning:   v('warning'),
+        // Legacy aliases
         brand: {
-          blue:    '#1A6FBF',
-          teal:    '#00A878',
-          orange:  '#FF6B35',
-          dark:    '#1C2B3A',
-          slate:   '#4A6070',
-          ice:     '#E8F4FD',
-          grey:    '#F2F5F7',
-          red:     '#D7263D',
-          amber:   '#FFC300',
+          blue:   v('primary'),
+          teal:   v('accent'),
+          orange: v('cta'),
+          dark:   v('fg'),
+          slate:  v('muted'),
+          ice:    v('primary-soft'),
+          grey:   v('surface-2'),
+          red:    v('danger'),
+          amber:  v('warning'),
         },
       },
+      ringColor: { DEFAULT: v('ring') },
       fontFamily: {
         sans:    ['Inter', 'system-ui', 'sans-serif'],
         display: ['Poppins', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card:  '0 2px 12px rgba(26,111,191,0.08)',
-        hover: '0 8px 24px rgba(26,111,191,0.16)',
-        ai:    '0 8px 32px rgba(255,107,53,0.24)',
+        card:  '0 1px 3px rgb(16 42 67 / 0.06), 0 1px 2px rgb(16 42 67 / 0.04)',
+        hover: '0 8px 24px rgb(16 42 67 / 0.12)',
+        ai:    '0 8px 32px rgb(234 88 12 / 0.24)',
       },
       borderRadius: {
         xl2: '1.25rem',

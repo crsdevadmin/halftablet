@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  PHARMACIST
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING_RX
+  RX_VERIFIED
+  CONFIRMED
+  DISPATCHED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum RxStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String
+  email     String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  orders    Order[]
+  reviewedPrescriptions Prescription[] @relation("Reviewer")
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone, code])
+}
+
+model Medicine {
+  id                   String   @id // keeps mock ids (m1, m2 …) so existing routes still work
+  name                 String
+  genericName          String
+  manufacturer         String
+  category             String
+  mrp                  Int
+  drmedPrice           Int
+  discountPercent      Int
+  requiresPrescription Boolean
+  coldChain            Boolean
+  saltComposition      String
+  description          String
+  dosage               String
+  storage              String
+  imageUrl             String
+  rating               Float
+  reviewCount          Int
+  reorderLevel         Int      @default(30)
+  uses                 Json     @default("[]")
+  sideEffects          Json     @default("{}")
+  tags                 Json     @default("[]")
+  batches              Batch[]
+  orderItems           OrderItem[]
+}
+
+model Batch {
+  id         String   @id @default(cuid())
+  medicineId String
+  medicine   Medicine @relation(fields: [medicineId], references: [id])
+  batchNo    String   @unique
+  expiry     DateTime
+  qty        Int
+
+  @@index([medicineId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  number        String        @unique // human-readable, e.g. ORD-2026-001252
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  status        OrderStatus
+  subtotal      Int
+  deliveryFee   Int
+  total         Int
+  address       Json
+  createdAt     DateTime      @default(now())
+  items         OrderItem[]
+  prescriptions Prescription[]
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  medicineId String
+  medicine   Medicine @relation(fields: [medicineId], references: [id])
+  quantity   Int
+  unitPrice  Int // price at time of purchase
+
+  @@index([orderId])
+}
+
+model Prescription {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id])
+  filePath   String
+  status     RxStatus  @default(PENDING)
+  reviewerId String?
+  reviewer   User?     @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([orderId])
+}

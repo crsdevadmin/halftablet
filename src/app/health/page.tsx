@@ -12,7 +12,7 @@ export default function HealthLibraryPage() {
       <div className="bg-gradient-to-br from-brand-blue to-blue-800 rounded-3xl p-8 mb-10 text-white text-center">
         <h1 className="font-display font-bold text-4xl mb-3">Health Library</h1>
         <p className="text-blue-200 text-lg mb-6">Expert-reviewed articles on medicines, conditions, and living well</p>
-        <div className="max-w-lg mx-auto flex gap-2 bg-white rounded-xl p-1.5">
+        <div className="max-w-lg mx-auto flex gap-2 bg-surface rounded-xl p-1.5">
           <Search size={18} className="ml-2 text-brand-slate self-center flex-shrink-0" />
           <input type="text" placeholder="Search articles..." className="flex-1 text-sm text-brand-dark outline-none px-2 bg-transparent" />
           <button className="bg-brand-orange text-white text-sm font-semibold px-4 py-2 rounded-lg">Search</button>
@@ -23,7 +23,7 @@ export default function HealthLibraryPage() {
       <div className="flex gap-2 overflow-x-auto pb-2 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
         {CATEGORIES.map((c, i) => (
           <button key={c} className={`whitespace-nowrap text-sm font-medium px-4 py-2 rounded-full border transition-colors flex-shrink-0
-            ${i === 0 ? 'bg-brand-blue text-white border-brand-blue' : 'border-gray-200 text-brand-slate hover:border-brand-blue hover:text-brand-blue'}`}>
+            ${i === 0 ? 'bg-brand-blue text-white border-brand-blue' : 'border-border text-brand-slate hover:border-brand-blue hover:text-brand-blue'}`}>
             {c}
           </button>
         ))}
@@ -47,7 +47,7 @@ export default function HealthLibraryPage() {
                 {article.title}
               </h2>
               <p className="text-sm text-brand-slate line-clamp-3 mb-4 flex-1">{article.excerpt}</p>
-              <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-100 pt-3 mt-auto">
+              <div className="flex items-center justify-between text-xs text-faint border-t border-border pt-3 mt-auto">
                 <span className="font-medium text-brand-slate truncate">{article.author}</span>
                 <span className="flex items-center gap-1 flex-shrink-0 ml-2">
                   <Clock size={11} /> {article.readTime} min read

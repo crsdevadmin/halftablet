@@ -90,7 +90,7 @@ export function AIChat() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open DrMed AI"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-brand-orange text-white rounded-full
+          className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 bg-brand-orange text-white rounded-full
                      shadow-ai flex items-center justify-center ai-bubble hover:scale-110 transition-transform">
           <MessageCircle size={26} />
         </button>
@@ -98,8 +98,8 @@ export function AIChat() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-24px)] h-[580px] max-h-[calc(100vh-80px)]
-                        flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-100 animate-slide-up overflow-hidden">
+        <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[380px] max-w-[calc(100vw-24px)] h-[580px] max-h-[calc(100vh-80px)]
+                        flex flex-col bg-surface rounded-2xl shadow-2xl border border-border animate-slide-up overflow-hidden">
 
           {/* Header */}
           <div className="bg-gradient-to-r from-brand-blue to-blue-700 p-4 flex items-center gap-3">
@@ -134,7 +134,7 @@ export function AIChat() {
                     'px-3 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap',
                     msg.role === 'user'
                       ? 'bg-brand-blue text-white rounded-tr-none'
-                      : 'bg-white text-brand-dark rounded-tl-none shadow-sm'
+                      : 'bg-surface text-brand-dark rounded-tl-none shadow-sm'
                   )}>
                     {msg.content}
                   </div>
@@ -142,7 +142,7 @@ export function AIChat() {
                   {msg.medicineCards && msg.medicineCards.length > 0 && (
                     <div className="grid gap-2">
                       {msg.medicineCards.slice(0, 2).map(m => (
-                        <div key={m.id} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 text-xs">
+                        <div key={m.id} className="bg-surface rounded-xl p-3 shadow-sm border border-border text-xs">
                           <p className="font-semibold text-brand-dark">{m.name}</p>
                           <p className="text-brand-slate">{m.genericName}</p>
                           <div className="flex items-center justify-between mt-2">
@@ -156,8 +156,8 @@ export function AIChat() {
                   {/* Feedback */}
                   {msg.role === 'assistant' && msg.id !== messages[0]?.id && (
                     <div className="flex gap-2 ml-1">
-                      <button className="text-gray-300 hover:text-brand-teal transition-colors"><ThumbsUp size={12} /></button>
-                      <button className="text-gray-300 hover:text-red-400 transition-colors"><ThumbsDown size={12} /></button>
+                      <button className="text-faint hover:text-brand-teal transition-colors"><ThumbsUp size={12} /></button>
+                      <button className="text-faint hover:text-red-400 transition-colors"><ThumbsDown size={12} /></button>
                     </div>
                   )}
                 </div>
@@ -168,7 +168,7 @@ export function AIChat() {
             {loading && (
               <div className="flex gap-2 items-start">
                 <div className="w-7 h-7 bg-brand-orange rounded-full flex items-center justify-center text-sm flex-shrink-0">🤖</div>
-                <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex gap-1 items-center">
+                <div className="bg-surface rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex gap-1 items-center">
                   {[0,1,2].map(i => (
                     <span key={i} className="w-2 h-2 bg-brand-slate rounded-full animate-bounce"
                       style={{ animationDelay: `${i * 0.15}s` }} />
@@ -181,7 +181,7 @@ export function AIChat() {
 
           {/* Quick replies */}
           {messages.length <= 2 && (
-            <div className="px-4 py-2 flex gap-2 flex-wrap border-t border-gray-100 bg-white">
+            <div className="px-4 py-2 flex gap-2 flex-wrap border-t border-border bg-surface">
               {QUICK_REPLIES.slice(0, 4).map(q => (
                 <button key={q} onClick={() => send(q)}
                   className="text-xs bg-brand-ice text-brand-blue font-medium px-3 py-1.5 rounded-full
@@ -193,7 +193,7 @@ export function AIChat() {
           )}
 
           {/* Input */}
-          <div className="p-3 border-t border-gray-100 bg-white">
+          <div className="p-3 border-t border-border bg-surface">
             <div className="flex items-center gap-2 bg-brand-grey rounded-xl px-3 py-2">
               <input
                 type="text"
@@ -212,7 +212,7 @@ export function AIChat() {
                 <Send size={14} />
               </button>
             </div>
-            <p className="text-center text-xs text-gray-400 mt-2">
+            <p className="text-center text-xs text-faint mt-2">
               DrMed AI provides information only — not medical advice.
             </p>
           </div>
