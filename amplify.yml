@@ -3,7 +3,9 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        # Committed lockfile is corrupted (empty version fields) — resolve fresh
+        - rm -f package-lock.json
+        - npm install --no-audit --no-fund
         - npx prisma generate
     build:
       commands:
