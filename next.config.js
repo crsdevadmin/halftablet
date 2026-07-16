@@ -6,9 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'mrmed-image.s3.ap-south-1.amazonaws.com' },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['openai'],
-  },
+  serverExternalPackages: ['openai'],
 }
 
 module.exports = nextConfig
