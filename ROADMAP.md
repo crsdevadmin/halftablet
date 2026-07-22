@@ -1,4 +1,4 @@
-# DrMed — Phase-wise Product Roadmap
+# HalfTablet — Phase-wise Product Roadmap
 
 Positioning: India's specialty-medicine pharmacy (cancer, kidney, HIV, hepatitis, transplant).
 Compete on trust and chronic-care experience, not discounts.
@@ -54,7 +54,7 @@ Exit criteria: real money in, customer notified at every order stage.
 - Serviceability check by PIN code at product page and checkout
 - Same-day metro option (Dunzo/Porter) where viable
 
-Exit criteria: customer tracks a real parcel inside DrMed, not a courier site.
+Exit criteria: customer tracks a real parcel inside HalfTablet, not a courier site.
 
 ## Phase 5 — Differentiators (the moat) · ongoing after Phase 2
 

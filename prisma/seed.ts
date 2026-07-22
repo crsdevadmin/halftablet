@@ -34,7 +34,7 @@ async function main() {
         manufacturer: m.manufacturer,
         category: m.category,
         mrp: m.mrp,
-        drmedPrice: m.drmedPrice,
+        halftabletPrice: m.halftabletPrice,
         discountPercent: m.discountPercent,
         requiresPrescription: m.requiresPrescription,
         coldChain: m.coldChain,

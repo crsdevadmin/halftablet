@@ -84,10 +84,10 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mt-auto pt-2">
-          <span className="font-display font-bold text-xl text-fg">{formatPrice(medicine.drmedPrice)}</span>
+          <span className="font-display font-bold text-xl text-fg">{formatPrice(medicine.halftabletPrice)}</span>
           <span className="mrp-display">{formatPrice(medicine.mrp)}</span>
           <span className="text-xs text-accent font-semibold ml-auto">
-            Save {formatPrice(medicine.mrp - medicine.drmedPrice)}
+            Save {formatPrice(medicine.mrp - medicine.halftabletPrice)}
           </span>
         </div>
 

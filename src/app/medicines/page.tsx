@@ -187,7 +187,7 @@ function CatalogContent() {
                 action={
                   <div className="flex items-center justify-center gap-3">
                     <Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>
-                    <Button size="sm" data-ai-open="true">Ask DrMed AI</Button>
+                    <Button size="sm" data-ai-open="true">Ask HalfTablet AI</Button>
                   </div>
                 }
               />

@@ -194,7 +194,7 @@ export default function PatientAssistancePage() {
 
           <p className="text-xs text-faint pt-2">
             Program details are indicative and change over time — always verify eligibility with the program directly.
-            DrMed patient support can guide you through any application free of charge.
+            HalfTablet patient support can guide you through any application free of charge.
           </p>
         </div>
       )}

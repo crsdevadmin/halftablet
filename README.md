@@ -1,6 +1,6 @@
-# DrMed — India's Intelligent Online Pharmacy
+# HalfTablet — India's Intelligent Online Pharmacy
 
-A full Next.js 14 web application scaffold for the DrMed online pharmacy platform.
+A full Next.js 14 web application scaffold for the HalfTablet online pharmacy platform.
 
 ## Quick Start
 
@@ -39,7 +39,7 @@ Open http://localhost:3000
 - **Cart with Zustand** — persisted in localStorage across sessions
 - **Prescription Upload UI** — built into checkout flow
 - **Responsive** — mobile-first design, works on all screen sizes
-- **Design System** — DrMed color palette, Poppins + Inter fonts, Tailwind utilities
+- **Design System** — HalfTablet color palette, Poppins + Inter fonts, Tailwind utilities
 
 ## AI Setup
 

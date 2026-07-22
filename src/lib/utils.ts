@@ -20,8 +20,8 @@ export function formatDate(dateStr: string): string {
   })
 }
 
-export function calculateSavings(mrp: number, drmedPrice: number): number {
-  return mrp - drmedPrice
+export function calculateSavings(mrp: number, halftabletPrice: number): number {
+  return mrp - halftabletPrice
 }
 
 export function slugify(text: string): string {

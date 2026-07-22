@@ -8,24 +8,24 @@ import { Toaster } from '@/components/ui/Toaster'
 import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
-  title: { default: 'DrMed — India\'s Intelligent Online Pharmacy', template: '%s | DrMed' },
+  title: { default: 'HalfTablet — India\'s Intelligent Online Pharmacy', template: '%s | HalfTablet' },
   description: 'Buy specialty medicines for cancer, kidney, HIV, hepatitis & more. Up to 85% off. AI-powered search. Pan-India delivery.',
   keywords: ['online pharmacy india', 'cancer medicine', 'specialty pharmacy', 'buy medicine online'],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    siteName: 'DrMed',
+    siteName: 'HalfTablet',
   },
 }
 
 // Applies saved/system theme before first paint — prevents dark-mode flash
 const themeInit = `
 try {
-  var t = localStorage.getItem('drmed-theme');
+  var t = localStorage.getItem('halftablet-theme');
   if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.classList.add('dark');
   }
-  if (localStorage.getItem('drmed-elder') === '1') {
+  if (localStorage.getItem('halftablet-elder') === '1') {
     document.documentElement.classList.add('elder');
   }
 } catch (e) {}

@@ -15,7 +15,7 @@ export function ThemeToggle() {
     const next = !dark
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
-    try { localStorage.setItem('drmed-theme', next ? 'dark' : 'light') } catch {}
+    try { localStorage.setItem('halftablet-theme', next ? 'dark' : 'light') } catch {}
   }
 
   // Avoid hydration mismatch — render a stable placeholder until mounted

@@ -38,7 +38,7 @@ export const PROGRAMS: AssistanceProgram[] = [
     excludesInsured: false,
     benefit: 'Free or heavily subsidised medicine for the full treatment duration, based on income assessment',
     documents: ['Prescription from an oncologist', 'Income certificate or ITR', 'Aadhaar', 'Biopsy/diagnosis report'],
-    howToApply: 'Applications go through your treating oncologist or the program\'s partner NGO. DrMed patient support can initiate this with you.',
+    howToApply: 'Applications go through your treating oncologist or the program\'s partner NGO. HalfTablet patient support can initiate this with you.',
   },
   {
     id: 'pharma-hep-access',
@@ -50,7 +50,7 @@ export const PROGRAMS: AssistanceProgram[] = [
     excludesInsured: false,
     benefit: 'Subsidised generic pricing and, for eligible patients, free courses',
     documents: ['Prescription', 'Viral load report', 'Income proof', 'Aadhaar'],
-    howToApply: 'Through the manufacturer\'s patient support line or DrMed patient support.',
+    howToApply: 'Through the manufacturer\'s patient support line or HalfTablet patient support.',
   },
   {
     id: 'govt-pmjay',
@@ -98,7 +98,7 @@ export const PROGRAMS: AssistanceProgram[] = [
     excludesInsured: false,
     benefit: 'Subsidised dialysis sessions and EPO injections at partner centres',
     documents: ['Nephrologist prescription', 'Income proof'],
-    howToApply: 'DrMed patient support can connect you to partner NGOs in your state.',
+    howToApply: 'HalfTablet patient support can connect you to partner NGOs in your state.',
   },
   {
     id: 'govt-art',

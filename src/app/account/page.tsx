@@ -41,7 +41,7 @@ export default function DashboardPage() {
       <div className="bg-gradient-to-r from-teal-700 to-teal-800 rounded-2xl p-5 mb-8 flex items-start gap-4 text-white">
         <div className="w-10 h-10 bg-cta rounded-full flex items-center justify-center text-lg flex-shrink-0" aria-hidden>🤖</div>
         <div className="flex-1">
-          <p className="font-semibold text-sm">DrMed AI Reminder</p>
+          <p className="font-semibold text-sm">HalfTablet AI Reminder</p>
           <p className="text-teal-100 text-sm mt-1">Your <strong className="text-white">Imatinib 400mg</strong> refill is due in 5 days. Would you like to reorder now?</p>
           <button className="mt-3 text-xs bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-lg font-semibold transition-colors">
             Reorder Now
@@ -55,7 +55,7 @@ export default function DashboardPage() {
           { icon: <Package size={20} className="text-primary" />, label: 'Active Orders', value: '1', href: '/account/orders', bg: 'bg-primary-soft' },
           { icon: <FileText size={20} className="text-warning" />, label: 'Prescriptions', value: '3', href: '/account/prescriptions', bg: 'bg-warning/10' },
           { icon: <Heart size={20} className="text-danger" />, label: 'Conditions', value: '2', href: '/account/health', bg: 'bg-danger/10' },
-          { icon: <Coins size={20} className="text-accent" />, label: 'DrMed Coins', value: '240', href: '/account/rewards', bg: 'bg-accent/10' },
+          { icon: <Coins size={20} className="text-accent" />, label: 'HalfTablet Coins', value: '240', href: '/account/rewards', bg: 'bg-accent/10' },
         ].map(stat => (
           <Link key={stat.label} href={stat.href}
             className="card p-4 flex items-center gap-3 group hover:-translate-y-0.5 transition-transform">

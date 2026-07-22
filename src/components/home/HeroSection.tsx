@@ -38,7 +38,7 @@ export function HeroSection() {
                 data-ai-open="true"
                 className="flex items-center gap-2 bg-cta hover:brightness-110
                            text-white font-semibold px-5 py-3 rounded-xl text-sm transition-all shadow-ai">
-                <MessageCircle size={16} /> Ask DrMed AI
+                <MessageCircle size={16} /> Ask HalfTablet AI
               </button>
             </div>
           </div>
@@ -51,12 +51,12 @@ export function HeroSection() {
                   🤖
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">DrMed AI</p>
+                  <p className="font-semibold text-sm">HalfTablet AI</p>
                   <p className="text-xs text-blue-200">● Online · Replies instantly</p>
                 </div>
               </div>
               <div className="bg-white/10 rounded-xl rounded-tl-none p-3 text-sm text-blue-50 max-w-xs">
-                Hi! I&apos;m your DrMed assistant. What medicine or condition can I help you with today?
+                Hi! I&apos;m your HalfTablet assistant. What medicine or condition can I help you with today?
               </div>
               <div className="flex justify-end">
                 <div className="bg-brand-orange/90 rounded-xl rounded-tr-none p-3 text-sm text-white max-w-xs">

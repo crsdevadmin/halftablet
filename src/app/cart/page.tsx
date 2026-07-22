@@ -92,7 +92,7 @@ export default function CartPage() {
                     onChange={q => updateQuantity(medicine.id, q)}
                   />
                   <div className="text-right">
-                    <p className="font-display font-bold text-fg">{formatPrice(medicine.drmedPrice * quantity)}</p>
+                    <p className="font-display font-bold text-fg">{formatPrice(medicine.halftabletPrice * quantity)}</p>
                     <p className="text-xs text-faint line-through">{formatPrice(medicine.mrp * quantity)}</p>
                   </div>
                   <button onClick={() => handleRemove(medicine.id)}

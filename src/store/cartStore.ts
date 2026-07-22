@@ -63,10 +63,10 @@ export const useCartStore = create<CartStore>()(
 
       clearCart: () => set({ items: [] }),
 
-      total: () => get().items.reduce((sum, i) => sum + i.medicine.drmedPrice * i.quantity, 0),
+      total: () => get().items.reduce((sum, i) => sum + i.medicine.halftabletPrice * i.quantity, 0),
 
       itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'drmed-cart' }
+    { name: 'halftablet-cart' }
   )
 )

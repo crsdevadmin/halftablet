@@ -30,3 +30,4 @@ Thumbs.db
 
 # uploaded prescriptions (dev-mode local storage)
 uploads/
+.fuse_hidden*

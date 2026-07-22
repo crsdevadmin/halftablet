@@ -23,7 +23,7 @@ export function AIChat() {
     {
       id: uid(),
       role: 'assistant',
-      content: "Hi! I'm DrMed AI 👋\n\nI can help you find medicines, check prices, understand side effects, or track your order.\n\nWhat can I help you with today?",
+      content: "Hi! I'm HalfTablet AI 👋\n\nI can help you find medicines, check prices, understand side effects, or track your order.\n\nWhat can I help you with today?",
       timestamp: new Date(),
     },
   ])
@@ -89,7 +89,7 @@ export function AIChat() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          aria-label="Open DrMed AI"
+          aria-label="Open HalfTablet AI"
           className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 bg-brand-orange text-white rounded-full
                      shadow-ai flex items-center justify-center ai-bubble hover:scale-110 transition-transform">
           <MessageCircle size={26} />
@@ -107,7 +107,7 @@ export function AIChat() {
               🤖
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-display font-bold text-white text-sm">DrMed AI</p>
+              <p className="font-display font-bold text-white text-sm">HalfTablet AI</p>
               <p className="text-blue-200 text-xs">● Online · Replies instantly</p>
             </div>
             <div className="flex items-center gap-1">
@@ -146,7 +146,7 @@ export function AIChat() {
                           <p className="font-semibold text-brand-dark">{m.name}</p>
                           <p className="text-brand-slate">{m.genericName}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="font-bold text-brand-blue">₹{m.drmedPrice.toLocaleString('en-IN')}</span>
+                            <span className="font-bold text-brand-blue">₹{m.halftabletPrice.toLocaleString('en-IN')}</span>
                             <span className="badge-discount">{m.discountPercent}% off</span>
                           </div>
                         </div>
@@ -213,7 +213,7 @@ export function AIChat() {
               </button>
             </div>
             <p className="text-center text-xs text-faint mt-2">
-              DrMed AI provides information only — not medical advice.
+              HalfTablet AI provides information only — not medical advice.
             </p>
           </div>
         </div>

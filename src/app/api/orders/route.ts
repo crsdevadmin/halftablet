@@ -72,9 +72,9 @@ export async function POST(req: Request) {
           remaining -= take
         }
 
-        subtotal += medicine.drmedPrice * item.quantity
+        subtotal += medicine.halftabletPrice * item.quantity
         if (medicine.requiresPrescription) requiresRx = true
-        orderItems.push({ medicineId: medicine.id, quantity: item.quantity, unitPrice: medicine.drmedPrice })
+        orderItems.push({ medicineId: medicine.id, quantity: item.quantity, unitPrice: medicine.halftabletPrice })
       }
 
       const deliveryFee = subtotal > 999 ? 0 : 99

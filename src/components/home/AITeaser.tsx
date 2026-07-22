@@ -17,7 +17,7 @@ export function AITeaser() {
               AI-Powered
             </span>
             <h2 className="font-display font-bold text-3xl md:text-4xl mb-4 leading-snug">
-              Meet Your DrMed<br />
+              Meet Your HalfTablet<br />
               <span className="text-brand-orange">AI Assistant</span>
             </h2>
             <p className="text-blue-200 text-base mb-6 leading-relaxed">
@@ -37,7 +37,7 @@ export function AITeaser() {
             <button
               data-ai-open="true"
               className="btn-primary inline-flex items-center gap-2">
-              <MessageCircle size={18} /> Try DrMed AI Now
+              <MessageCircle size={18} /> Try HalfTablet AI Now
             </button>
           </div>
 

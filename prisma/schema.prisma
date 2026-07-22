@@ -58,7 +58,7 @@ model Medicine {
   manufacturer         String
   category             String
   mrp                  Int
-  drmedPrice           Int
+  halftabletPrice           Int
   discountPercent      Int
   requiresPrescription Boolean
   coldChain            Boolean

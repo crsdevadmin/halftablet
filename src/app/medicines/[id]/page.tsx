@@ -81,11 +81,11 @@ export default function ProductDetailPage() {
           {/* Price block */}
           <div className="bg-brand-ice rounded-xl p-5">
             <div className="flex items-baseline gap-3 mb-1">
-              <span className="font-display font-bold text-4xl text-brand-blue">{formatPrice(medicine.drmedPrice)}</span>
+              <span className="font-display font-bold text-4xl text-brand-blue">{formatPrice(medicine.halftabletPrice)}</span>
               <span className="text-lg text-brand-slate line-through">{formatPrice(medicine.mrp)}</span>
             </div>
             <p className="text-brand-teal font-semibold text-sm">
-              You save {formatPrice(medicine.mrp - medicine.drmedPrice)} ({medicine.discountPercent}% off)
+              You save {formatPrice(medicine.mrp - medicine.halftabletPrice)} ({medicine.discountPercent}% off)
             </p>
           </div>
 
@@ -122,7 +122,7 @@ export default function ProductDetailPage() {
           <button data-ai-open="true"
             className="w-full flex items-center justify-center gap-2 border-2 border-brand-orange text-brand-orange
                        hover:bg-brand-orange hover:text-white font-semibold py-3 rounded-xl text-sm transition-all">
-            <MessageCircle size={16} /> Ask DrMed AI About This Medicine
+            <MessageCircle size={16} /> Ask HalfTablet AI About This Medicine
           </button>
 
           {/* Delivery */}
@@ -201,7 +201,7 @@ export default function ProductDetailPage() {
                 <Snowflake size={18} className="text-brand-blue flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold text-sm text-brand-blue">Cold-Chain Required</p>
-                  <p className="text-xs text-blue-700 mt-1">This medicine requires temperature-controlled storage (2–8°C). DrMed uses certified cold-chain packaging and real-time temperature monitoring for delivery.</p>
+                  <p className="text-xs text-blue-700 mt-1">This medicine requires temperature-controlled storage (2–8°C). HalfTablet uses certified cold-chain packaging and real-time temperature monitoring for delivery.</p>
                 </div>
               </div>
             )}

@@ -1,4 +1,4 @@
-# DrMed — Phase 2 Setup (Windows)
+# HalfTablet — Phase 2 Setup (Windows)
 
 One-time setup to run the app with a real PostgreSQL database, login, and orders.
 
@@ -9,21 +9,21 @@ One-time setup to run the app with a real PostgreSQL database, login, and orders
 3. When it finishes, open **SQL Shell (psql)** from the Start menu, press Enter through the prompts, type your password, then create the database:
 
 ```sql
-CREATE DATABASE drmed;
+CREATE DATABASE halftablet;
 ```
 
 ## 2. Configure environment
 
-In the project folder (`Downloads\drmed`), create **two** files:
+In the project folder (`Downloads\halftablet`), create **two** files:
 
 **`.env`** (Prisma reads this one):
 ```
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/drmed
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/halftablet
 ```
 
 **`.env.local`** (Next.js reads this one — copy from `.env.local.example`):
 ```
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/drmed
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/halftablet
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=any-long-random-string-for-dev
 ```

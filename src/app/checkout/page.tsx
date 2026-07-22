@@ -111,7 +111,7 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-fg">{medicine.name}</p>
                     <p className="text-xs text-muted">Qty: {quantity}</p>
                   </div>
-                  <p className="font-bold text-fg">{formatPrice(medicine.drmedPrice * quantity)}</p>
+                  <p className="font-bold text-fg">{formatPrice(medicine.halftabletPrice * quantity)}</p>
                 </div>
               ))}
               <Button size="lg" className="w-full mt-4" onClick={() => setStep(1)}>
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
             </div>
           </div>
           <div className="text-xs text-accent font-semibold">
-            You save {formatPrice(items.reduce((s, i) => s + (i.medicine.mrp - i.medicine.drmedPrice) * i.quantity, 0))} on this order!
+            You save {formatPrice(items.reduce((s, i) => s + (i.medicine.mrp - i.medicine.halftabletPrice) * i.quantity, 0))} on this order!
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ const links = {
     { label: 'Upload Prescription', href: '/upload-rx' },
   ],
   Company: [
-    { label: 'About DrMed', href: '/about' },
+    { label: 'About HalfTablet', href: '/about' },
     { label: 'Health Library', href: '/health' },
     { label: 'News', href: '/news' },
     { label: 'Careers', href: '/careers' },
@@ -47,7 +47,7 @@ export function Footer() {
             <div className="space-y-1 text-xs">
               <p>📍 Chennai, Tamil Nadu, India</p>
               <p>📞 1800-XXX-XXXX (Toll Free)</p>
-              <p>✉️ care@drmed.in</p>
+              <p>✉️ care@halftablet.in</p>
             </div>
           </div>
 
@@ -80,7 +80,7 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted">
-          <p>© 2026 DrMed Pharmacy Pvt. Ltd. All rights reserved.</p>
+          <p>© 2026 HalfTablet Pharmacy Pvt. Ltd. All rights reserved.</p>
           <p className="text-center">
             Medicines shown are for informational purposes. Always consult a doctor before taking any medication.
           </p>

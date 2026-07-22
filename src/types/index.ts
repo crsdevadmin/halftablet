@@ -5,7 +5,7 @@ export interface Medicine {
   manufacturer: string
   category: MedicineCategory
   mrp: number
-  drmedPrice: number
+  halftabletPrice: number
   discountPercent: number
   inStock: boolean
   stockLevel: 'high' | 'low' | 'out'

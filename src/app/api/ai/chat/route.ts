@@ -4,7 +4,7 @@ import { MEDICINES } from '@/lib/mockData'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-const SYSTEM_PROMPT = `You are DrMed AI, the helpful assistant for DrMed — India's intelligent online pharmacy specialising in specialty medicines for cancer, kidney disease, HIV/AIDS, hepatitis, heart conditions, arthritis, diabetes, and transplant care.
+const SYSTEM_PROMPT = `You are HalfTablet AI, the helpful assistant for HalfTablet — India's intelligent online pharmacy specialising in specialty medicines for cancer, kidney disease, HIV/AIDS, hepatitis, heart conditions, arthritis, diabetes, and transplant care.
 
 You help patients:
 1. Find medicines by name, salt name, or condition
@@ -24,9 +24,9 @@ STRICT RULES:
 - If you are unsure about something, say so and offer to connect them with a pharmacist
 
 Available medicine catalog context:
-${MEDICINES.slice(0, 5).map(m => `- ${m.name} (${m.genericName}): ₹${m.drmedPrice} (${m.discountPercent}% off MRP ₹${m.mrp}), ${m.requiresPrescription ? 'Rx required' : 'No Rx needed'}`).join('\n')}
+${MEDICINES.slice(0, 5).map(m => `- ${m.name} (${m.genericName}): ₹${m.halftabletPrice} (${m.discountPercent}% off MRP ₹${m.mrp}), ${m.requiresPrescription ? 'Rx required' : 'No Rx needed'}`).join('\n')}
 
-You can also tell users that DrMed carries 5,000+ specialty medicines with up to 85% discount.`
+You can also tell users that HalfTablet carries 5,000+ specialty medicines with up to 85% discount.`
 
 export async function POST(req: NextRequest) {
   try {

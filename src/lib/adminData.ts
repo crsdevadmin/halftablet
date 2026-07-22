@@ -40,7 +40,7 @@ export const TOTALS = {
 export const TOP_SELLERS = MEDICINES.map((m, i) => ({
   medicine: m,
   unitsSold: 220 - i * 24 + ((i * 37) % 11),
-  revenue: (220 - i * 24 + ((i * 37) % 11)) * m.drmedPrice,
+  revenue: (220 - i * 24 + ((i * 37) % 11)) * m.halftabletPrice,
 })).sort((a, b) => b.revenue - a.revenue)
 
 // ---------- Inventory ----------

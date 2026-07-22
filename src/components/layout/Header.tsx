@@ -40,7 +40,7 @@ export function Header() {
         <div className="flex items-center gap-3 h-16">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-1 flex-shrink-0" aria-label="DrMed home">
+          <Link href="/" className="flex items-center gap-1 flex-shrink-0" aria-label="HalfTablet home">
             <span className="font-display font-bold text-2xl text-primary">Dr</span>
             <span className="font-display font-bold text-2xl text-cta">Med</span>
           </Link>

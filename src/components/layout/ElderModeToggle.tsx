@@ -20,7 +20,7 @@ export function ElderModeToggle() {
     const next = !on
     setOn(next)
     document.documentElement.classList.toggle('elder', next)
-    try { localStorage.setItem('drmed-elder', next ? '1' : '0') } catch {}
+    try { localStorage.setItem('halftablet-elder', next ? '1' : '0') } catch {}
     toast(next ? 'Easy-read mode on — larger text everywhere' : 'Easy-read mode off', { kind: 'info' })
   }
 
