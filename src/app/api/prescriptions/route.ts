@@ -71,10 +71,11 @@ export async function POST(req: Request) {
     // extraction is best-effort — never block the upload
   }
 
+  const suggestionsJson = JSON.parse(JSON.stringify(aiSuggestions))
   const prescription = await prisma.prescription.create({
     data: orderId
-      ? { orderId, userId: session.user.id, filePath, aiSuggestions }
-      : { userId: session.user.id, filePath, aiSuggestions },
+      ? { orderId, userId: session.user.id, filePath, aiSuggestions: suggestionsJson }
+      : { userId: session.user.id, filePath, aiSuggestions: suggestionsJson },
   })
 
   return NextResponse.json(
