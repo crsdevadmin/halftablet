@@ -80,11 +80,30 @@ Rules:
     return parsed
       .filter(x => x && typeof x.name === 'string')
       .slice(0, 15)
-      .map(x => ({
-        id: typeof x.id === 'string' && MEDICINES.some(m => m.id === x.id) ? x.id : null,
-        name: String(x.name).slice(0, 120),
-        ...(typeof x.note === 'string' ? { note: x.note.slice(0, 200) } : {}),
-      }))
+      .map(x => {
+        const name = String(x.name).slice(0, 120)
+        let id: string | null =
+          typeof x.id === 'string' && MEDICINES.some(m => m.id === x.id) ? x.id : null
+        // Fallback: match by name if the model didn't return a catalog id
+        if (!id) {
+          const q = name.toLowerCase()
+          const hit = MEDICINES.find(m => {
+            const brand = m.name.toLowerCase()
+            const generic = m.genericName.toLowerCase()
+            // strip strength ("imatinib 400mg" → "imatinib") for looser matching
+            const base = brand.replace(/\s*\d+.*$/, '')
+            return (
+              q.includes(base) || brand.includes(q) || q.includes(generic) || generic.includes(q)
+            )
+          })
+          if (hit) id = hit.id
+        }
+        return {
+          id,
+          name,
+          ...(typeof x.note === 'string' ? { note: x.note.slice(0, 200) } : {}),
+        }
+      })
   } catch {
     return []
   }

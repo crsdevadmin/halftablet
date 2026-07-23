@@ -15,15 +15,15 @@ interface RxItem {
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   aiSuggestions?: { id: string | null; name: string; note?: string }[]
-  requestedItems?: { medicineId: string; quantity: number }[]
+  requestedItems?: { medicineId: string; quantity: number }[] | null
   order: { id: string; number: string; status: string; total: number } | null
 }
 
 type SelItem = { medicineId: string; quantity: number }
 
-/** Patient's working selection: their saved choice, else AI catalog matches */
+/** Patient's working selection: their saved choice (empty = cleared), else AI catalog matches */
 function initialSelection(rx: RxItem): SelItem[] {
-  if (rx.requestedItems?.length) return rx.requestedItems
+  if (rx.requestedItems != null) return rx.requestedItems
   return (rx.aiSuggestions ?? [])
     .filter(s => s.id)
     .map(s => ({ medicineId: s.id as string, quantity: 1 }))

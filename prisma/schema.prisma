@@ -125,7 +125,7 @@ model Prescription {
   user       User?     @relation("Uploader", fields: [userId], references: [id])
   filePath   String
   aiSuggestions Json   @default("[]") // medicines Claude read from the Rx (pharmacist verifies)
-  requestedItems Json  @default("[]") // patient's own selection: [{medicineId, quantity}]
+  requestedItems Json? // patient's selection [{medicineId, quantity}]; null = never set (fall back to AI matches)
   status     RxStatus  @default(PENDING)
   reviewerId String?
   reviewer   User?     @relation("Reviewer", fields: [reviewerId], references: [id])

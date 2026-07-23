@@ -15,7 +15,7 @@ interface PendingRx {
   userId: string | null
   user: { name: string; phone: string } | null
   aiSuggestions?: { id: string | null; name: string; note?: string }[]
-  requestedItems?: { medicineId: string; quantity: number }[]
+  requestedItems?: { medicineId: string; quantity: number }[] | null
 }
 
 interface PickedItem {
@@ -165,7 +165,7 @@ export default function AdminPrescriptionsPage() {
                     // otherwise the medicines AI read from the Rx (pharmacist verifies)
                     setPicked(
                       opening
-                        ? rx.requestedItems?.length
+                        ? rx.requestedItems != null
                           ? rx.requestedItems
                           : (rx.aiSuggestions ?? [])
                               .filter(s => s.id)

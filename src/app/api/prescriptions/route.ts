@@ -72,10 +72,16 @@ export async function POST(req: Request) {
   }
 
   const suggestionsJson = JSON.parse(JSON.stringify(aiSuggestions))
+  // Start the patient's editable selection from the AI catalog matches
+  const initialItems = JSON.parse(
+    JSON.stringify(
+      aiSuggestions.filter(s => s.id).map(s => ({ medicineId: s.id, quantity: 1 }))
+    )
+  )
   const prescription = await prisma.prescription.create({
     data: orderId
-      ? { orderId, userId: session.user.id, filePath, aiSuggestions: suggestionsJson }
-      : { userId: session.user.id, filePath, aiSuggestions: suggestionsJson },
+      ? { orderId, userId: session.user.id, filePath, aiSuggestions: suggestionsJson, requestedItems: initialItems }
+      : { userId: session.user.id, filePath, aiSuggestions: suggestionsJson, requestedItems: initialItems },
   })
 
   return NextResponse.json(
