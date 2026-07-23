@@ -65,7 +65,7 @@ export default function CheckoutPage() {
       <h1 className="font-display font-bold text-3xl text-fg mb-3">Order Placed!</h1>
       <p className="text-muted mb-2">Order ID: <strong className="text-fg">{ordered.number}</strong></p>
       <p className="text-muted mb-6 text-sm">Our pharmacist will review your prescription within 2–4 hours. You&apos;ll receive a WhatsApp confirmation.</p>
-      <a href="/account/orders" className={buttonVariants('primary', 'lg')}>Track My Order</a>
+      <a href="/account" className={buttonVariants('primary', 'lg')}>Track My Order</a>
     </div>
   )
 

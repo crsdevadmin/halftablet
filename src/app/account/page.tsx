@@ -52,10 +52,10 @@ export default function DashboardPage() {
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { icon: <Package size={20} className="text-primary" />, label: 'Active Orders', value: '1', href: '/account/orders', bg: 'bg-primary-soft' },
-          { icon: <FileText size={20} className="text-warning" />, label: 'Prescriptions', value: '3', href: '/account/prescriptions', bg: 'bg-warning/10' },
-          { icon: <Heart size={20} className="text-danger" />, label: 'Conditions', value: '2', href: '/account/health', bg: 'bg-danger/10' },
-          { icon: <Coins size={20} className="text-accent" />, label: 'HalfTablet Coins', value: '240', href: '/account/rewards', bg: 'bg-accent/10' },
+          { icon: <Package size={20} className="text-primary" />, label: 'Active Orders', value: '1', href: '/account', bg: 'bg-primary-soft' },
+          { icon: <FileText size={20} className="text-warning" />, label: 'Prescriptions', value: '3', href: '/account', bg: 'bg-warning/10' },
+          { icon: <Heart size={20} className="text-danger" />, label: 'Conditions', value: '2', href: '/account', bg: 'bg-danger/10' },
+          { icon: <Coins size={20} className="text-accent" />, label: 'HalfTablet Coins', value: '240', href: '/account', bg: 'bg-accent/10' },
         ].map(stat => (
           <Link key={stat.label} href={stat.href}
             className="card p-4 flex items-center gap-3 group hover:-translate-y-0.5 transition-transform">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display font-semibold text-lg text-fg">Active Order</h2>
-            <Link href="/account/orders" className="text-sm text-primary font-semibold hover:underline">View all →</Link>
+            <Link href="/account" className="text-sm text-primary font-semibold hover:underline">View all →</Link>
           </div>
           <div className="flex items-center justify-between mb-4">
             <div>
