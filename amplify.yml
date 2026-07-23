@@ -9,8 +9,8 @@ frontend:
         - npx prisma generate
     build:
       commands:
-        # Apply any pending migrations to RDS, seed (idempotent upserts), then build
-        - npx prisma migrate deploy
+        # Sync schema to RDS (no migration files in repo), seed (idempotent upserts), then build
+        - npx prisma db push --accept-data-loss
         - npx prisma db seed
         - npm run build
   artifacts:
