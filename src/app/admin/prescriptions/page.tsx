@@ -15,6 +15,7 @@ interface PendingRx {
   userId: string | null
   user: { name: string; phone: string } | null
   aiSuggestions?: { id: string | null; name: string; note?: string }[]
+  requestedItems?: { medicineId: string; quantity: number }[]
 }
 
 interface PickedItem {
@@ -160,12 +161,15 @@ export default function AdminPrescriptionsPage() {
                   onClick={() => {
                     const opening = activeRx?.id !== rx.id
                     setActiveRx(opening ? rx : null)
-                    // Pre-fill with the medicines AI read from the Rx (pharmacist verifies)
+                    // Pre-fill with the patient's own selection if they made one,
+                    // otherwise the medicines AI read from the Rx (pharmacist verifies)
                     setPicked(
                       opening
-                        ? (rx.aiSuggestions ?? [])
-                            .filter(s => s.id)
-                            .map(s => ({ medicineId: s.id as string, quantity: 1 }))
+                        ? rx.requestedItems?.length
+                          ? rx.requestedItems
+                          : (rx.aiSuggestions ?? [])
+                              .filter(s => s.id)
+                              .map(s => ({ medicineId: s.id as string, quantity: 1 }))
                         : []
                     )
                   }}
@@ -177,11 +181,15 @@ export default function AdminPrescriptionsPage() {
 
             {activeRx?.id === rx.id && (
               <div className="mt-5 border-t border-border pt-5">
+                {(rx.requestedItems?.length ?? 0) > 0 && (
+                  <p className="text-xs text-fg mb-1">
+                    🙋 Patient selected these medicines themselves — pre-added below; verify against the file.
+                  </p>
+                )}
                 {(rx.aiSuggestions?.length ?? 0) > 0 && (
                   <p className="text-xs text-muted mb-3">
                     🤖 AI read from this Rx:{' '}
                     {rx.aiSuggestions!.map(s => s.name + (s.note ? ` (${s.note})` : '')).join(' · ')}
-                    {' '}— catalog matches are pre-added below; verify against the file.
                   </p>
                 )}
                 <Input

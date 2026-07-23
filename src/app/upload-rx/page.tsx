@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { FileText, Upload, CheckCircle2, Clock, XCircle, Package } from 'lucide-react'
+import { FileText, Upload, CheckCircle2, Clock, XCircle, Package, Plus, Minus, Trash2 } from 'lucide-react'
+import { MEDICINES } from '@/lib/mockData'
 import { Button, buttonVariants } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge, type BadgeVariant } from '@/components/ui/Badge'
@@ -14,7 +15,18 @@ interface RxItem {
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   aiSuggestions?: { id: string | null; name: string; note?: string }[]
+  requestedItems?: { medicineId: string; quantity: number }[]
   order: { id: string; number: string; status: string; total: number } | null
+}
+
+type SelItem = { medicineId: string; quantity: number }
+
+/** Patient's working selection: their saved choice, else AI catalog matches */
+function initialSelection(rx: RxItem): SelItem[] {
+  if (rx.requestedItems?.length) return rx.requestedItems
+  return (rx.aiSuggestions ?? [])
+    .filter(s => s.id)
+    .map(s => ({ medicineId: s.id as string, quantity: 1 }))
 }
 
 const RX_BADGE: Record<RxItem['status'], { variant: BadgeVariant; label: string; icon: React.ReactNode }> = {
@@ -34,6 +46,56 @@ export default function UploadRxPage() {
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [address, setAddress] = useState(EMPTY_ADDRESS)
   const [placing, setPlacing] = useState(false)
+  const [editRxId, setEditRxId] = useState<string | null>(null)
+  const [editItems, setEditItems] = useState<SelItem[]>([])
+  const [medQuery, setMedQuery] = useState('')
+  const [savingSel, setSavingSel] = useState(false)
+
+  const searchResults = medQuery.trim()
+    ? MEDICINES.filter(m => {
+        const q = medQuery.trim().toLowerCase()
+        return m.name.toLowerCase().includes(q) || m.genericName.toLowerCase().includes(q)
+      }).slice(0, 5)
+    : []
+
+  const changeSelQty = (medicineId: string, delta: number) =>
+    setEditItems(p =>
+      p
+        .map(i => (i.medicineId === medicineId ? { ...i, quantity: i.quantity + delta } : i))
+        .filter(i => i.quantity > 0)
+    )
+
+  const addSelMedicine = (medicineId: string) => {
+    setEditItems(p =>
+      p.some(i => i.medicineId === medicineId)
+        ? p.map(i => (i.medicineId === medicineId ? { ...i, quantity: i.quantity + 1 } : i))
+        : [...p, { medicineId, quantity: 1 }]
+    )
+    setMedQuery('')
+  }
+
+  const saveSelection = async (rxId: string) => {
+    setSavingSel(true)
+    try {
+      const res = await fetch('/api/prescriptions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: rxId, action: 'items', items: editItems }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast(data.error || 'Could not save your selection', { kind: 'error' })
+        return
+      }
+      toast('Selection saved — our pharmacist will verify it against your prescription', { kind: 'success' })
+      setEditRxId(null)
+      load()
+    } catch {
+      toast('Network error — please try again', { kind: 'error' })
+    } finally {
+      setSavingSel(false)
+    }
+  }
 
   const load = useCallback(async () => {
     const res = await fetch('/api/prescriptions')
@@ -172,22 +234,126 @@ export default function UploadRxPage() {
                     <Badge variant={badge.variant}>{badge.icon} {badge.label}</Badge>
                   </div>
 
-                  {(rx.aiSuggestions?.length ?? 0) > 0 && (
-                    <div className="mt-3 bg-surface-2 rounded-xl p-4">
-                      <p className="text-xs font-semibold text-fg mb-2">
-                        💊 Medicines we read from your prescription
-                        <span className="font-normal text-muted"> — our pharmacist will verify before preparing your order</span>
-                      </p>
-                      <ul className="space-y-1">
-                        {rx.aiSuggestions!.map((s, i) => (
-                          <li key={i} className="text-sm text-fg flex items-baseline gap-2">
-                            <span className="font-semibold">{s.name}</span>
-                            {s.note && <span className="text-xs text-muted">{s.note}</span>}
-                            {s.id && <Badge variant="cold" className="ml-auto">In stock</Badge>}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {rx.status === 'PENDING' && !rx.order && (() => {
+                    const editing = editRxId === rx.id
+                    const selection = editing ? editItems : initialSelection(rx)
+                    const unmatched = (rx.aiSuggestions ?? []).filter(s => !s.id)
+                    const selTotal = selection.reduce((s, i) => {
+                      const m = MEDICINES.find(x => x.id === i.medicineId)
+                      return s + (m ? m.halftabletPrice * i.quantity : 0)
+                    }, 0)
+                    return (
+                      <div className="mt-3 bg-surface-2 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-fg mb-2">
+                          💊 {rx.requestedItems?.length ? 'Your medicine selection' : 'Medicines we read from your prescription'}
+                          <span className="font-normal text-muted"> — our pharmacist will verify before preparing your order</span>
+                        </p>
+
+                        {selection.length === 0 && !editing && (
+                          <p className="text-sm text-muted">No medicines selected yet — add what you need below.</p>
+                        )}
+
+                        <ul className="space-y-2">
+                          {selection.map(item => {
+                            const m = MEDICINES.find(x => x.id === item.medicineId)
+                            if (!m) return null
+                            const note = rx.aiSuggestions?.find(s => s.id === item.medicineId)?.note
+                            return (
+                              <li key={item.medicineId} className="text-sm flex items-center gap-2 bg-surface rounded-lg px-3 py-2">
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-semibold text-fg">{m.name}</span>
+                                  {note && <span className="text-xs text-muted ml-2">{note}</span>}
+                                  <span className="block text-xs text-muted">{formatPrice(m.halftabletPrice)} each</span>
+                                </div>
+                                {editing ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <button className="p-1 rounded-lg hover:bg-surface-2" onClick={() => changeSelQty(m.id, -1)} aria-label="Decrease">
+                                      <Minus size={13} />
+                                    </button>
+                                    <span className="text-sm font-semibold w-5 text-center">{item.quantity}</span>
+                                    <button className="p-1 rounded-lg hover:bg-surface-2" onClick={() => changeSelQty(m.id, 1)} aria-label="Increase">
+                                      <Plus size={13} />
+                                    </button>
+                                    <button className="p-1 rounded-lg hover:bg-surface-2 text-danger" onClick={() => changeSelQty(m.id, -item.quantity)} aria-label="Remove">
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted whitespace-nowrap">× {item.quantity}</span>
+                                )}
+                              </li>
+                            )
+                          })}
+                        </ul>
+
+                        {unmatched.length > 0 && (
+                          <p className="text-xs text-muted mt-2">
+                            Also on your Rx (not in our catalog — pharmacist will advise): {unmatched.map(s => s.name).join(', ')}
+                          </p>
+                        )}
+
+                        {editing && (
+                          <div className="mt-3">
+                            <Input
+                              label="Add another medicine"
+                              name="med-search"
+                              placeholder="Search by name or salt…"
+                              value={medQuery}
+                              onChange={e => setMedQuery(e.target.value)}
+                            />
+                            {searchResults.length > 0 && (
+                              <div className="mt-1 card divide-y divide-border overflow-hidden">
+                                {searchResults.map(m => (
+                                  <button
+                                    key={m.id}
+                                    className="w-full text-left px-3 py-2 hover:bg-surface-2 transition-colors flex items-center justify-between gap-2 text-sm"
+                                    onClick={() => addSelMedicine(m.id)}
+                                  >
+                                    <span className="min-w-0">
+                                      <span className="block font-semibold text-fg truncate">{m.name}</span>
+                                      <span className="block text-xs text-muted truncate">{m.genericName}</span>
+                                    </span>
+                                    <span className="font-semibold whitespace-nowrap">{formatPrice(m.halftabletPrice)}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
+                          <p className="text-xs text-muted">
+                            Estimated total <strong className="text-fg">{formatPrice(selTotal)}</strong>
+                          </p>
+                          {editing ? (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => saveSelection(rx.id)} disabled={savingSel}>
+                                {savingSel ? 'Saving…' : 'Save Selection'}
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditRxId(null)}>Cancel</Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditRxId(rx.id)
+                                setEditItems(initialSelection(rx))
+                                setMedQuery('')
+                              }}
+                            >
+                              Adjust Medicines
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {rx.status !== 'PENDING' && (rx.aiSuggestions?.length ?? 0) > 0 && !rx.order && (
+                    <p className="text-xs text-muted mt-2">
+                      Read from your Rx: {rx.aiSuggestions!.map(s => s.name).join(', ')}
+                    </p>
                   )}
 
                   {awaiting && rx.order && (

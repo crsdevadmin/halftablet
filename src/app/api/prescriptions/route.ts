@@ -84,16 +84,59 @@ export async function POST(req: Request) {
   )
 }
 
-/** PATCH { id, action: 'approve' | 'reject' } — pharmacist/admin only */
+/**
+ * PATCH
+ *  { id, action: 'approve' | 'reject' } — pharmacist/admin only
+ *  { id, action: 'items', items: [{medicineId, quantity}] } — the uploading
+ *    patient adjusts which medicines (and how many) they want from their Rx
+ */
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session?.user || (session.user.role !== 'PHARMACIST' && session.user.role !== 'ADMIN')) {
-    return NextResponse.json({ error: 'Pharmacist access required' }, { status: 403 })
-  }
+  if (!session?.user) return NextResponse.json({ error: 'Sign in required' }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   const id = String(body?.id ?? '')
   const action = body?.action
+
+  if (action === 'items') {
+    const items = Array.isArray(body?.items) ? body.items : []
+    if (
+      !id ||
+      items.length > 30 ||
+      items.some(
+        (i: { medicineId?: unknown; quantity?: unknown }) =>
+          typeof i.medicineId !== 'string' ||
+          !Number.isInteger(i.quantity) ||
+          (i.quantity as number) < 1 ||
+          (i.quantity as number) > 50
+      )
+    ) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    }
+
+    const rx = await prisma.prescription.findUnique({ where: { id } })
+    if (!rx || rx.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Prescription not found' }, { status: 404 })
+    }
+    if (rx.orderId || rx.status !== 'PENDING') {
+      return NextResponse.json({ error: 'This prescription is already being processed' }, { status: 409 })
+    }
+
+    const requestedItems = JSON.parse(
+      JSON.stringify(
+        items.map((i: { medicineId: string; quantity: number }) => ({
+          medicineId: i.medicineId,
+          quantity: i.quantity,
+        }))
+      )
+    )
+    await prisma.prescription.update({ where: { id }, data: { requestedItems } })
+    return NextResponse.json({ ok: true, requestedItems })
+  }
+
+  if (session.user.role !== 'PHARMACIST' && session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Pharmacist access required' }, { status: 403 })
+  }
 
   if (!id || (action !== 'approve' && action !== 'reject')) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
