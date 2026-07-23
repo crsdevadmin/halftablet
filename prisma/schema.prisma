@@ -124,6 +124,7 @@ model Prescription {
   userId     String? // uploader (set for standalone uploads)
   user       User?     @relation("Uploader", fields: [userId], references: [id])
   filePath   String
+  aiSuggestions Json   @default("[]") // medicines Claude read from the Rx (pharmacist verifies)
   status     RxStatus  @default(PENDING)
   reviewerId String?
   reviewer   User?     @relation("Reviewer", fields: [reviewerId], references: [id])

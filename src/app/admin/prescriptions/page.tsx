@@ -14,6 +14,7 @@ interface PendingRx {
   createdAt: string
   userId: string | null
   user: { name: string; phone: string } | null
+  aiSuggestions?: { id: string | null; name: string; note?: string }[]
 }
 
 interface PickedItem {
@@ -157,8 +158,16 @@ export default function AdminPrescriptionsPage() {
                   size="sm"
                   variant={activeRx?.id === rx.id ? 'outline' : 'primary'}
                   onClick={() => {
-                    setActiveRx(activeRx?.id === rx.id ? null : rx)
-                    setPicked([])
+                    const opening = activeRx?.id !== rx.id
+                    setActiveRx(opening ? rx : null)
+                    // Pre-fill with the medicines AI read from the Rx (pharmacist verifies)
+                    setPicked(
+                      opening
+                        ? (rx.aiSuggestions ?? [])
+                            .filter(s => s.id)
+                            .map(s => ({ medicineId: s.id as string, quantity: 1 }))
+                        : []
+                    )
                   }}
                 >
                   {activeRx?.id === rx.id ? 'Close' : 'Prepare Order'}
@@ -168,6 +177,13 @@ export default function AdminPrescriptionsPage() {
 
             {activeRx?.id === rx.id && (
               <div className="mt-5 border-t border-border pt-5">
+                {(rx.aiSuggestions?.length ?? 0) > 0 && (
+                  <p className="text-xs text-muted mb-3">
+                    🤖 AI read from this Rx:{' '}
+                    {rx.aiSuggestions!.map(s => s.name + (s.note ? ` (${s.note})` : '')).join(' · ')}
+                    {' '}— catalog matches are pre-added below; verify against the file.
+                  </p>
+                )}
                 <Input
                   label="Add medicine from catalog"
                   name="medicine-search"

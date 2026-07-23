@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { saveUpload } from '@/lib/storage'
+import { extractMedicinesFromRx, type RxSuggestion } from '@/lib/rxAi'
 import crypto from 'crypto'
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
@@ -59,15 +60,27 @@ export async function POST(req: Request) {
 
   const ext = file.type === 'application/pdf' ? 'pdf' : file.type === 'image/png' ? 'png' : 'jpg'
   const name = `${orderId || session.user.id}-${crypto.randomUUID()}.${ext}`
-  const filePath = await saveUpload(name, Buffer.from(await file.arrayBuffer()), file.type)
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const filePath = await saveUpload(name, buffer, file.type)
+
+  // AI reads the Rx so the patient sees progress immediately; pharmacist verifies
+  let aiSuggestions: RxSuggestion[] = []
+  try {
+    aiSuggestions = await extractMedicinesFromRx(buffer, file.type)
+  } catch {
+    // extraction is best-effort — never block the upload
+  }
 
   const prescription = await prisma.prescription.create({
     data: orderId
-      ? { orderId, userId: session.user.id, filePath }
-      : { userId: session.user.id, filePath },
+      ? { orderId, userId: session.user.id, filePath, aiSuggestions }
+      : { userId: session.user.id, filePath, aiSuggestions },
   })
 
-  return NextResponse.json({ prescription: { id: prescription.id, status: prescription.status } }, { status: 201 })
+  return NextResponse.json(
+    { prescription: { id: prescription.id, status: prescription.status, aiSuggestions } },
+    { status: 201 }
+  )
 }
 
 /** PATCH { id, action: 'approve' | 'reject' } — pharmacist/admin only */

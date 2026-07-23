@@ -13,6 +13,7 @@ interface RxItem {
   id: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
+  aiSuggestions?: { id: string | null; name: string; note?: string }[]
   order: { id: string; number: string; status: string; total: number } | null
 }
 
@@ -170,6 +171,24 @@ export default function UploadRxPage() {
                     </div>
                     <Badge variant={badge.variant}>{badge.icon} {badge.label}</Badge>
                   </div>
+
+                  {(rx.aiSuggestions?.length ?? 0) > 0 && (
+                    <div className="mt-3 bg-surface-2 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-fg mb-2">
+                        💊 Medicines we read from your prescription
+                        <span className="font-normal text-muted"> — our pharmacist will verify before preparing your order</span>
+                      </p>
+                      <ul className="space-y-1">
+                        {rx.aiSuggestions!.map((s, i) => (
+                          <li key={i} className="text-sm text-fg flex items-baseline gap-2">
+                            <span className="font-semibold">{s.name}</span>
+                            {s.note && <span className="text-xs text-muted">{s.note}</span>}
+                            {s.id && <Badge variant="cold" className="ml-auto">In stock</Badge>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {awaiting && rx.order && (
                     <div className="mt-4 bg-primary-soft rounded-xl p-4">
