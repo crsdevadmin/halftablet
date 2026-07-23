@@ -1,35 +1,57 @@
 'use client'
-import { useState } from 'react'
-import { FileText, Snowflake, ChevronRight } from 'lucide-react'
-import {
-  ADMIN_ORDERS, ORDER_STATUS_LABELS, PIPELINE_STATUSES, type AdminOrder,
-} from '@/lib/adminData'
+import { useCallback, useEffect, useState } from 'react'
+import { FileText, Snowflake, ChevronRight, Hourglass, ExternalLink } from 'lucide-react'
+import { ORDER_STATUS_LABELS, PIPELINE_STATUSES } from '@/lib/adminData'
 import { formatPrice, formatDate, cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { toast } from '@/components/ui/Toaster'
 import { OrderStatus } from '@/types'
 
-function OrderCard({ order, onAdvance }: { order: AdminOrder; onAdvance: (o: AdminOrder) => void }) {
-  const next = PIPELINE_STATUSES[PIPELINE_STATUSES.indexOf(order.status) + 1]
+interface LiveOrder {
+  id: string
+  number: string
+  status: string // server enum, e.g. PENDING_RX
+  total: number
+  createdAt: string
+  address: { city?: string } | null
+  user: { name: string; phone: string }
+  items: { quantity: number; medicine: { name: string; coldChain: boolean } }[]
+  prescriptions: { id: string; status: string }[]
+}
+
+const toUi = (s: string) => s.toLowerCase() as OrderStatus
+
+function OrderCard({ order, onAdvance, busy }: { order: LiveOrder; onAdvance: (o: LiveOrder, next: OrderStatus) => void; busy: boolean }) {
+  const ui = toUi(order.status)
+  const next = PIPELINE_STATUSES[PIPELINE_STATUSES.indexOf(ui) + 1]
+  const itemCount = order.items.reduce((s, i) => s + i.quantity, 0)
+  const coldChain = order.items.some(i => i.medicine.coldChain)
+  const rx = order.prescriptions[0]
   return (
     <div className="card p-3 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-fg truncate">{order.customer}</p>
-          <p className="text-xs text-muted">{order.city} · {formatDate(order.createdAt)}</p>
+          <p className="text-sm font-semibold text-fg truncate">{order.user.name}</p>
+          <p className="text-xs text-muted">{order.address?.city || order.user.phone} · {formatDate(order.createdAt)}</p>
         </div>
         <p className="text-sm font-bold text-fg whitespace-nowrap">{formatPrice(order.total)}</p>
       </div>
-      <p className="text-xs font-mono text-faint">{order.id}</p>
+      <p className="text-xs font-mono text-faint">{order.number}</p>
       <div className="flex items-center gap-1.5 flex-wrap">
-        <Badge variant="neutral">{order.itemCount} item{order.itemCount > 1 ? 's' : ''}</Badge>
-        {order.requiresRx && <Badge variant="rx"><FileText size={10} aria-hidden /> Rx</Badge>}
-        {order.coldChain && <Badge variant="cold"><Snowflake size={10} aria-hidden /> Cold</Badge>}
+        <Badge variant="neutral">{itemCount} item{itemCount > 1 ? 's' : ''}</Badge>
+        {rx && (
+          <a href={`/api/prescriptions/file?id=${rx.id}`} target="_blank" rel="noopener noreferrer"
+             className="inline-flex">
+            <Badge variant="rx"><FileText size={10} aria-hidden /> Rx <ExternalLink size={9} aria-hidden /></Badge>
+          </a>
+        )}
+        {coldChain && <Badge variant="cold"><Snowflake size={10} aria-hidden /> Cold</Badge>}
       </div>
       {next && (
-        <Button size="sm" variant="outline" className="w-full" onClick={() => onAdvance(order)}>
-          {order.status === 'pending_rx' ? 'Verify Rx' : `Move to ${ORDER_STATUS_LABELS[next]}`}
+        <Button size="sm" variant="outline" className="w-full" disabled={busy}
+          onClick={() => onAdvance(order, next)}>
+          {ui === 'pending_rx' ? 'Verify Rx' : `Move to ${ORDER_STATUS_LABELS[next]}`}
           <ChevronRight size={13} aria-hidden />
         </Button>
       )}
@@ -38,31 +60,78 @@ function OrderCard({ order, onAdvance }: { order: AdminOrder; onAdvance: (o: Adm
 }
 
 export default function OrdersPipelinePage() {
-  const [orders, setOrders] = useState(ADMIN_ORDERS)
+  const [orders, setOrders] = useState<LiveOrder[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
 
-  const advance = (order: AdminOrder) => {
-    const next = PIPELINE_STATUSES[PIPELINE_STATUSES.indexOf(order.status) + 1] as OrderStatus | undefined
-    if (!next) return
-    setOrders(os => os.map(o => o.id === order.id ? { ...o, status: next } : o))
-    toast(`${order.id} → ${ORDER_STATUS_LABELS[next]}`, { kind: 'success' })
+  const load = useCallback(async () => {
+    const res = await fetch('/api/orders')
+    if (res.ok) {
+      const data = await res.json()
+      setOrders(data.orders ?? [])
+    } else if (res.status === 401) {
+      toast('Sign in with a pharmacist or admin account', { kind: 'info' })
+    }
+    setLoaded(true)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const advance = async (order: LiveOrder, next: OrderStatus) => {
+    setBusy(true)
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: order.id, action: 'status', status: next.toUpperCase() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast(data.error || 'Could not update order', { kind: 'error' })
+        return
+      }
+      setOrders(os => os.map(o => (o.id === order.id ? { ...o, status: next.toUpperCase() } : o)))
+      toast(`${order.number} → ${ORDER_STATUS_LABELS[next]}`, { kind: 'success' })
+    } catch {
+      toast('Network error — please try again', { kind: 'error' })
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const cancelled = orders.filter(o => o.status === 'cancelled')
+  const awaiting = orders.filter(o => o.status === 'AWAITING_CONFIRMATION')
+  const cancelled = orders.filter(o => o.status === 'CANCELLED')
 
   return (
     <div className="space-y-5">
       <div>
         <h1 className="font-display font-bold text-2xl text-fg">Order Pipeline</h1>
         <p className="text-sm text-muted mt-0.5">
-          {orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length} active ·{' '}
-          {orders.filter(o => o.status === 'pending_rx').length} awaiting Rx verification
+          {orders.filter(o => o.status !== 'DELIVERED' && o.status !== 'CANCELLED').length} active ·{' '}
+          {orders.filter(o => o.status === 'PENDING_RX').length} awaiting Rx verification
         </p>
       </div>
+
+      {!loaded && <p className="text-sm text-muted">Loading orders…</p>}
+
+      {awaiting.length > 0 && (
+        <div className="card p-4 border-primary/30 bg-primary-soft/50">
+          <h2 className="text-sm font-semibold text-fg mb-2 flex items-center gap-2">
+            <Hourglass size={14} className="text-primary" aria-hidden />
+            Waiting for patient confirmation ({awaiting.length})
+          </h2>
+          {awaiting.map(o => (
+            <p key={o.id} className="text-xs text-muted font-mono">
+              {o.number} · {o.user.name} · {formatPrice(o.total)}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* Kanban on desktop, stacked sections on mobile */}
       <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
         {PIPELINE_STATUSES.map(status => {
-          const col = orders.filter(o => o.status === status)
+          const col = orders.filter(o => toUi(o.status) === status)
           return (
             <section
               key={status}
@@ -82,7 +151,7 @@ export default function OrdersPipelinePage() {
                 {col.length === 0 ? (
                   <p className="text-xs text-faint text-center py-4">Empty</p>
                 ) : (
-                  col.map(o => <OrderCard key={o.id} order={o} onAdvance={advance} />)
+                  col.map(o => <OrderCard key={o.id} order={o} onAdvance={advance} busy={busy} />)
                 )}
               </div>
             </section>
@@ -94,7 +163,7 @@ export default function OrdersPipelinePage() {
         <div className="card p-4">
           <h2 className="text-sm font-semibold text-muted mb-2">Cancelled ({cancelled.length})</h2>
           {cancelled.map(o => (
-            <p key={o.id} className="text-xs text-faint font-mono">{o.id} · {o.customer} · {formatPrice(o.total)}</p>
+            <p key={o.id} className="text-xs text-faint font-mono">{o.number} · {o.user.name} · {formatPrice(o.total)}</p>
           ))}
         </div>
       )}

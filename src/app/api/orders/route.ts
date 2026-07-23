@@ -16,7 +16,11 @@ export async function GET() {
   const isStaff = session.user.role === 'ADMIN' || session.user.role === 'PHARMACIST'
   const orders = await prisma.order.findMany({
     where: isStaff ? {} : { userId: session.user.id },
-    include: { items: { include: { medicine: { select: { name: true } } } }, prescriptions: true },
+    include: {
+      items: { include: { medicine: { select: { name: true, coldChain: true } } } },
+      prescriptions: true,
+      user: { select: { name: true, phone: true } },
+    },
     orderBy: { createdAt: 'desc' },
     take: 50,
   })
@@ -144,6 +148,22 @@ export async function PATCH(req: Request) {
 
   const body = await req.json().catch(() => null)
   const id = String(body?.id ?? '')
+
+  // Staff advancing an order through the pipeline
+  if (body?.action === 'status') {
+    const isStaff = session.user.role === 'ADMIN' || session.user.role === 'PHARMACIST'
+    if (!isStaff) return NextResponse.json({ error: 'Pharmacist access required' }, { status: 403 })
+
+    const allowed = ['RX_VERIFIED', 'CONFIRMED', 'DISPATCHED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'] as const
+    const status = body?.status
+    if (!id || !allowed.includes(status)) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    }
+    const updated = await prisma.order.update({ where: { id }, data: { status } }).catch(() => null)
+    if (!updated) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    return NextResponse.json({ order: { id: updated.id, number: updated.number, status: updated.status } })
+  }
+
   if (!id || body?.action !== 'confirm') {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }

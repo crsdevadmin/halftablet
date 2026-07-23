@@ -8,6 +8,7 @@ import { Button, buttonVariants } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { toast } from '@/components/ui/Toaster'
 import { cn } from '@/lib/utils'
+import { SafetyWarnings } from '@/components/cart/SafetyWarnings'
 
 const STEPS = ['Cart Review', 'Delivery & Rx', 'Payment']
 
@@ -112,6 +113,7 @@ export default function CheckoutPage() {
           {step === 0 && (
             <div className="card p-6 space-y-4">
               <h2 className="font-display font-semibold text-lg text-fg">Review Cart</h2>
+              <SafetyWarnings medicines={items.map(i => i.medicine)} />
               {items.map(({ medicine, quantity }) => (
                 <div key={medicine.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                   <div>

@@ -9,6 +9,7 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { buttonVariants } from '@/components/ui/Button'
+import { SafetyWarnings } from '@/components/cart/SafetyWarnings'
 import { toast } from '@/components/ui/Toaster'
 
 export default function CartPage() {
@@ -60,6 +61,7 @@ export default function CartPage() {
       <h1 className="font-display font-bold text-3xl text-fg mb-8">
         Your Cart <span className="text-muted text-xl font-normal">({itemCount()} items)</span>
       </h1>
+      <SafetyWarnings medicines={items.map(i => i.medicine)} />
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
