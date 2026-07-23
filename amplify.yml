@@ -9,11 +9,13 @@ frontend:
         - npx prisma generate
     build:
       commands:
-        # Sync schema to RDS (no migration files in repo), seed (idempotent upserts), then build
-        - npx prisma db push --accept-data-loss
-        - npx prisma db seed
+        # Schema sync + seed run as the master DB user (MIGRATE_DATABASE_URL);
+        # the app itself runs with the restricted halftablet_app user (DATABASE_URL)
+        - DATABASE_URL="${MIGRATE_DATABASE_URL:-$DATABASE_URL}" npx prisma db push --accept-data-loss
+        - DATABASE_URL="${MIGRATE_DATABASE_URL:-$DATABASE_URL}" npx prisma db seed
         # Amplify env vars exist only at build time — bake them in for the SSR runtime
-        - env | grep -e DATABASE_URL -e NEXTAUTH_SECRET -e NEXTAUTH_URL -e OTP_DEBUG -e ANTHROPIC_API_KEY -e S3_BUCKET -e REGION >> .env.production
+        # (anchored ^ so MIGRATE_DATABASE_URL with the master password is NOT baked in)
+        - env | grep -e '^DATABASE_URL=' -e '^NEXTAUTH_SECRET=' -e '^NEXTAUTH_URL=' -e '^OTP_DEBUG=' -e '^ANTHROPIC_API_KEY=' -e '^S3_BUCKET=' -e '^REGION=' >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
