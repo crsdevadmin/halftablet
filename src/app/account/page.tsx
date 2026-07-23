@@ -1,128 +1,167 @@
+'use client'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MOCK_ORDER, MEDICINES } from '@/lib/mockData'
-import { formatDate } from '@/lib/utils'
-import { Package, FileText, Heart, Coins, ChevronRight, Clock } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { formatPrice, formatDate } from '@/lib/utils'
+import { Package, FileText, ChevronRight, Download, Hourglass } from 'lucide-react'
 import { Badge, type BadgeVariant } from '@/components/ui/Badge'
-import { OrderStatus } from '@/types'
+import { buttonVariants } from '@/components/ui/Button'
 
-const STATUS_BADGE: Record<OrderStatus, BadgeVariant> = {
-  pending_rx: 'warning',
-  rx_verified: 'cold',
-  confirmed: 'cold',
-  dispatched: 'cold',
-  out_for_delivery: 'rx',
-  delivered: 'success',
-  cancelled: 'danger',
+interface MyOrder {
+  id: string
+  number: string
+  status: string
+  total: number
+  createdAt: string
+  items: { quantity: number; medicine: { name: string } }[]
 }
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending_rx: 'Awaiting Prescription',
-  rx_verified: 'Rx Verified',
-  confirmed: 'Confirmed',
-  dispatched: 'Dispatched',
-  out_for_delivery: 'Out for Delivery',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
+interface MyRx {
+  id: string
+  status: string
+  createdAt: string
+  order: { id: string; number: string } | null
+}
+
+const STATUS_UI: Record<string, { label: string; variant: BadgeVariant }> = {
+  AWAITING_CONFIRMATION: { label: 'Ready — Confirm Order', variant: 'warning' },
+  PENDING_RX: { label: 'Awaiting Prescription', variant: 'warning' },
+  RX_VERIFIED: { label: 'Rx Verified', variant: 'cold' },
+  CONFIRMED: { label: 'Confirmed', variant: 'cold' },
+  DISPATCHED: { label: 'Dispatched', variant: 'cold' },
+  OUT_FOR_DELIVERY: { label: 'Out for Delivery', variant: 'rx' },
+  DELIVERED: { label: 'Delivered', variant: 'success' },
+  CANCELLED: { label: 'Cancelled', variant: 'danger' },
+}
+
+const PROGRESS: Record<string, number> = {
+  PENDING_RX: 15, RX_VERIFIED: 30, CONFIRMED: 45, DISPATCHED: 65, OUT_FOR_DELIVERY: 85, DELIVERED: 100,
 }
 
 export default function DashboardPage() {
-  const order = MOCK_ORDER
-  const refills = MEDICINES.slice(0, 2)
+  const { data: session, status: authStatus } = useSession()
+  const [orders, setOrders] = useState<MyOrder[]>([])
+  const [prescriptions, setPrescriptions] = useState<MyRx[]>([])
+  const [loaded, setLoaded] = useState(false)
+
+  const load = useCallback(async () => {
+    const [oRes, pRes] = await Promise.all([fetch('/api/orders'), fetch('/api/prescriptions')])
+    if (oRes.ok) setOrders((await oRes.json()).orders ?? [])
+    if (pRes.ok) setPrescriptions((await pRes.json()).prescriptions ?? [])
+    setLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (session?.user) load()
+  }, [session, load])
+
+  if (authStatus === 'unauthenticated') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-20 text-center">
+        <p className="text-fg font-semibold mb-2">Sign in to see your orders</p>
+        <Link href="/login?callbackUrl=/account" className={buttonVariants('primary', 'lg')}>
+          Sign In with Mobile Number
+        </Link>
+      </div>
+    )
+  }
+
+  const active = orders.filter(o => !['DELIVERED', 'CANCELLED'].includes(o.status))
+  const awaiting = orders.filter(o => o.status === 'AWAITING_CONFIRMATION')
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {/* Greeting */}
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
-        <h1 className="font-display font-bold text-3xl text-fg">Hello, Thirumurugan 👋</h1>
-        <p className="text-muted mt-1">Here&apos;s a summary of your health dashboard</p>
+        <h1 className="font-display font-bold text-3xl text-fg">
+          Hello, {session?.user?.name ?? 'there'} 👋
+        </h1>
+        <p className="text-muted mt-1">Your orders and prescriptions, all in one place</p>
       </div>
 
-      {/* AI insight */}
-      <div className="bg-gradient-to-r from-teal-700 to-teal-800 rounded-2xl p-5 mb-8 flex items-start gap-4 text-white">
-        <div className="w-10 h-10 bg-cta rounded-full flex items-center justify-center text-lg flex-shrink-0" aria-hidden>🤖</div>
-        <div className="flex-1">
-          <p className="font-semibold text-sm">HalfTablet AI Reminder</p>
-          <p className="text-teal-100 text-sm mt-1">Your <strong className="text-white">Imatinib 400mg</strong> refill is due in 5 days. Would you like to reorder now?</p>
-          <button className="mt-3 text-xs bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-lg font-semibold transition-colors">
-            Reorder Now
-          </button>
-        </div>
-      </div>
+      {awaiting.length > 0 && (
+        <Link href="/upload-rx"
+          className="card p-4 mb-6 flex items-center gap-3 border-warning/40 bg-warning/5 hover:bg-warning/10 transition-colors">
+          <Hourglass size={18} className="text-warning" aria-hidden />
+          <p className="text-sm text-fg flex-1">
+            Our pharmacist prepared {awaiting.length === 1 ? 'an order' : `${awaiting.length} orders`} from your
+            prescription — <strong>tap to review and confirm</strong>.
+          </p>
+          <ChevronRight size={16} className="text-warning" aria-hidden />
+        </Link>
+      )}
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {[
-          { icon: <Package size={20} className="text-primary" />, label: 'Active Orders', value: '1', href: '/account', bg: 'bg-primary-soft' },
-          { icon: <FileText size={20} className="text-warning" />, label: 'Prescriptions', value: '3', href: '/account', bg: 'bg-warning/10' },
-          { icon: <Heart size={20} className="text-danger" />, label: 'Conditions', value: '2', href: '/account', bg: 'bg-danger/10' },
-          { icon: <Coins size={20} className="text-accent" />, label: 'HalfTablet Coins', value: '240', href: '/account', bg: 'bg-accent/10' },
-        ].map(stat => (
-          <Link key={stat.label} href={stat.href}
-            className="card p-4 flex items-center gap-3 group hover:-translate-y-0.5 transition-transform">
-            <div className={`${stat.bg} w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0`} aria-hidden>
-              {stat.icon}
-            </div>
-            <div>
-              <p className="font-display font-bold text-xl text-fg">{stat.value}</p>
-              <p className="text-xs text-muted">{stat.label}</p>
-            </div>
-            <ChevronRight size={14} className="ml-auto text-faint group-hover:text-primary transition-colors" aria-hidden />
-          </Link>
-        ))}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="card p-4 flex items-center gap-3">
+          <div className="bg-primary-soft w-10 h-10 rounded-xl flex items-center justify-center" aria-hidden>
+            <Package size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="font-display font-bold text-xl text-fg">{loaded ? active.length : '…'}</p>
+            <p className="text-xs text-muted">Active Orders</p>
+          </div>
+        </div>
+        <Link href="/upload-rx" className="card p-4 flex items-center gap-3 group hover:-translate-y-0.5 transition-transform">
+          <div className="bg-warning/10 w-10 h-10 rounded-xl flex items-center justify-center" aria-hidden>
+            <FileText size={20} className="text-warning" />
+          </div>
+          <div>
+            <p className="font-display font-bold text-xl text-fg">{loaded ? prescriptions.length : '…'}</p>
+            <p className="text-xs text-muted">Prescriptions</p>
+          </div>
+          <ChevronRight size={14} className="ml-auto text-faint group-hover:text-primary transition-colors" aria-hidden />
+        </Link>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Active order */}
-        <div className="lg:col-span-2 card p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display font-semibold text-lg text-fg">Active Order</h2>
-            <Link href="/account" className="text-sm text-primary font-semibold hover:underline">View all →</Link>
-          </div>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="font-mono text-sm text-fg font-semibold">{order.id}</p>
-              <p className="text-xs text-muted">Placed {formatDate(order.createdAt)}</p>
-            </div>
-            <Badge variant={STATUS_BADGE[order.status]}>{STATUS_LABELS[order.status]}</Badge>
-          </div>
-
-          {/* Progress */}
-          <div className="relative mb-5">
-            <div className="h-1.5 bg-surface-2 rounded-full">
-              <div className="h-1.5 bg-primary rounded-full transition-all" style={{ width: '60%' }} />
-            </div>
-            <div className="flex justify-between text-xs text-muted mt-2">
-              <span>Order Placed</span><span>Dispatched</span><span>Delivered</span>
-            </div>
-          </div>
-
-          <div className="bg-primary-soft rounded-xl p-3 flex items-center gap-3 text-sm">
-            <Clock size={16} className="text-primary" aria-hidden />
-            <span className="text-fg">Estimated delivery: <strong>{formatDate(order.estimatedDelivery)}</strong></span>
-          </div>
+      <h2 className="font-display font-semibold text-lg text-fg mb-4">My Orders</h2>
+      {!loaded && <p className="text-sm text-muted">Loading…</p>}
+      {loaded && orders.length === 0 && (
+        <div className="card p-8 text-center">
+          <p className="text-sm text-muted mb-4">No orders yet.</p>
+          <Link href="/medicines" className={buttonVariants('primary', 'md')}>Browse Medicines</Link>
         </div>
+      )}
 
-        {/* Upcoming refills */}
-        <div className="card p-6">
-          <h2 className="font-display font-semibold text-lg text-fg mb-5">Upcoming Refills</h2>
-          <div className="space-y-4">
-            {refills.map((m, i) => (
-              <div key={m.id} className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-surface-2 rounded-xl flex items-center justify-center text-lg flex-shrink-0" aria-hidden>💊</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-fg truncate">{m.name}</p>
-                  <p className="text-xs text-muted">Due in {5 + i * 4} days</p>
+      <div className="space-y-4">
+        {orders.map(o => {
+          const ui = STATUS_UI[o.status] ?? { label: o.status, variant: 'neutral' as BadgeVariant }
+          const progress = PROGRESS[o.status]
+          const summary = o.items.map(i => `${i.medicine.name} × ${i.quantity}`).join(', ')
+          const invoiceReady = !['AWAITING_CONFIRMATION', 'PENDING_RX', 'CANCELLED'].includes(o.status)
+          return (
+            <div key={o.id} className="card p-5">
+              <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+                <div>
+                  <p className="font-mono text-sm text-fg font-semibold">{o.number}</p>
+                  <p className="text-xs text-muted">Placed {formatDate(o.createdAt)}</p>
                 </div>
-                <button className="text-xs bg-primary text-white px-2 py-1 rounded-lg hover:brightness-110 transition-all whitespace-nowrap">
-                  Reorder
-                </button>
+                <div className="flex items-center gap-3">
+                  <Badge variant={ui.variant}>{ui.label}</Badge>
+                  <p className="font-bold text-fg">{formatPrice(o.total)}</p>
+                </div>
               </div>
-            ))}
-          </div>
-          <Link href="/medicines" className="block text-center text-sm text-primary font-semibold mt-5 hover:underline">
-            + Add medicines to track
-          </Link>
-        </div>
+              <p className="text-sm text-muted truncate mb-3">{summary}</p>
+              {progress !== undefined && (
+                <div className="h-1.5 bg-surface-2 rounded-full mb-3">
+                  <div className="h-1.5 bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
+                </div>
+              )}
+              <div className="flex items-center gap-4">
+                {o.status === 'AWAITING_CONFIRMATION' && (
+                  <Link href="/upload-rx" className="text-sm text-primary font-semibold hover:underline">
+                    Review & Confirm →
+                  </Link>
+                )}
+                {invoiceReady && (
+                  <a href={`/api/orders/invoice?id=${o.id}`}
+                    className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline">
+                    <Download size={13} aria-hidden /> GST Invoice
+                  </a>
+                )}
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
