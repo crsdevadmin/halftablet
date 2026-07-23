@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
 import { MEDICINES } from '@/lib/mockData'
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const SYSTEM_PROMPT = `You are HalfTablet AI, the helpful assistant for HalfTablet — India's intelligent online pharmacy specialising in specialty medicines for cancer, kidney disease, HIV/AIDS, hepatitis, heart conditions, arthritis, diabetes, and transplant care.
 
@@ -45,23 +42,44 @@ export async function POST(req: NextRequest) {
       m.tags.some(t => query.includes(t.toLowerCase()))
     ).slice(0, 3)
 
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({
+        reply: "AI assistant is not configured yet. For now, you can browse medicines directly or contact our pharmacist.",
+        medicines: matchedMedicines.length > 0 ? matchedMedicines : undefined,
+      })
+    }
+
     const messages = [
-      { role: 'system' as const, content: SYSTEM_PROMPT },
       ...((history || []).slice(-6).map((m: { role: string; content: string }) => ({
-        role: m.role as 'user' | 'assistant',
+        role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
         content: m.content,
       }))),
       { role: 'user' as const, content: message },
     ]
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: 400,
-      temperature: 0.6,
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 400,
+        system: SYSTEM_PROMPT,
+        messages,
+      }),
     })
 
-    const reply = completion.choices[0]?.message?.content || "I'm sorry, I couldn't process that. Please try again."
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(`Anthropic API ${res.status}: ${errText}`)
+    }
+
+    const data = await res.json()
+    const reply = data.content?.[0]?.text || "I'm sorry, I couldn't process that. Please try again."
 
     return NextResponse.json({
       reply,
@@ -69,11 +87,8 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: unknown) {
     console.error('AI chat error:', error)
-    const isApiKeyMissing = !process.env.OPENAI_API_KEY
     return NextResponse.json({
-      reply: isApiKeyMissing
-        ? "AI assistant is not configured yet. Add your OPENAI_API_KEY to .env.local to enable it. For now, you can browse medicines directly or call us at 1800-XXX-XXXX."
-        : "I'm having trouble right now. Please try again in a moment.",
-    }, { status: isApiKeyMissing ? 200 : 500 })
+      reply: "I'm having trouble right now. Please try again in a moment.",
+    }, { status: 500 })
   }
 }
