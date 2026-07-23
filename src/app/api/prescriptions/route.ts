@@ -95,7 +95,7 @@ export async function PATCH(req: Request) {
   })
 
   // Advance the order when its Rx is approved
-  if (action === 'approve') {
+  if (action === 'approve' && prescription.orderId) {
     await prisma.order.update({
       where: { id: prescription.orderId, status: 'PENDING_RX' },
       data: { status: 'RX_VERIFIED' },
