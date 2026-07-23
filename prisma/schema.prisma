@@ -14,6 +14,7 @@ enum Role {
 }
 
 enum OrderStatus {
+  AWAITING_CONFIRMATION // pharmacist prepared this order from an uploaded Rx; patient must confirm
   PENDING_RX
   RX_VERIFIED
   CONFIRMED
@@ -38,6 +39,7 @@ model User {
   createdAt DateTime @default(now())
   orders    Order[]
   reviewedPrescriptions Prescription[] @relation("Reviewer")
+  prescriptions         Prescription[] @relation("Uploader")
 }
 
 model OtpCode {
@@ -117,8 +119,10 @@ model OrderItem {
 
 model Prescription {
   id         String    @id @default(cuid())
-  orderId    String
-  order      Order     @relation(fields: [orderId], references: [id])
+  orderId    String? // null = uploaded standalone, before any order exists
+  order      Order?    @relation(fields: [orderId], references: [id])
+  userId     String? // uploader (set for standalone uploads)
+  user       User?     @relation("Uploader", fields: [userId], references: [id])
   filePath   String
   status     RxStatus  @default(PENDING)
   reviewerId String?
@@ -127,4 +131,5 @@ model Prescription {
   createdAt  DateTime  @default(now())
 
   @@index([orderId])
+  @@index([userId])
 }

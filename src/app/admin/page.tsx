@@ -74,7 +74,10 @@ export default function AdminOverviewPage() {
         <div className="card p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-lg text-fg">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-sm text-primary font-semibold hover:underline">View pipeline →</Link>
+            <div className="flex items-center gap-4">
+              <Link href="/admin/prescriptions" className="text-sm text-primary font-semibold hover:underline">Review prescriptions →</Link>
+              <Link href="/admin/orders" className="text-sm text-primary font-semibold hover:underline">View pipeline →</Link>
+            </div>
           </div>
           <ul className="space-y-3">
             {recentOrders.map(o => (

@@ -1,33 +1,104 @@
+'use client'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { FileText, Search, ShoppingCart, Upload, CheckCircle2 } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/Button'
+import { FileText, Upload, CheckCircle2, Clock, XCircle, Package } from 'lucide-react'
+import { Button, buttonVariants } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Badge, type BadgeVariant } from '@/components/ui/Badge'
+import { toast } from '@/components/ui/Toaster'
+import { formatPrice } from '@/lib/utils'
 
-export const metadata = { title: 'Upload Prescription — HalfTablet' }
+interface RxItem {
+  id: string
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  createdAt: string
+  order: { id: string; number: string; status: string; total: number } | null
+}
 
-const STEPS = [
-  {
-    icon: <Search size={20} aria-hidden />,
-    title: 'Find your medicines',
-    desc: 'Search by medicine name, salt name, or condition and add them to your cart.',
-  },
-  {
-    icon: <ShoppingCart size={20} aria-hidden />,
-    title: 'Go to checkout',
-    desc: 'Sign in with your mobile number and confirm your delivery details.',
-  },
-  {
-    icon: <Upload size={20} aria-hidden />,
-    title: 'Upload your prescription',
-    desc: 'At checkout you can upload a photo or PDF of your prescription (JPG, PNG or PDF, max 10MB).',
-  },
-  {
-    icon: <CheckCircle2 size={20} aria-hidden />,
-    title: 'Pharmacist verification',
-    desc: 'Our licensed pharmacist reviews it within 2–4 hours and your order moves ahead.',
-  },
-]
+const RX_BADGE: Record<RxItem['status'], { variant: BadgeVariant; label: string; icon: React.ReactNode }> = {
+  PENDING: { variant: 'warning', label: 'Awaiting pharmacist review', icon: <Clock size={13} aria-hidden /> },
+  APPROVED: { variant: 'success', label: 'Approved', icon: <CheckCircle2 size={13} aria-hidden /> },
+  REJECTED: { variant: 'danger', label: 'Rejected', icon: <XCircle size={13} aria-hidden /> },
+}
+
+const EMPTY_ADDRESS = { name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' }
 
 export default function UploadRxPage() {
+  const { data: session, status: authStatus } = useSession()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [items, setItems] = useState<RxItem[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [address, setAddress] = useState(EMPTY_ADDRESS)
+  const [placing, setPlacing] = useState(false)
+
+  const load = useCallback(async () => {
+    const res = await fetch('/api/prescriptions')
+    if (res.ok) {
+      const data = await res.json()
+      setItems(data.prescriptions ?? [])
+    }
+    setLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (session?.user) load()
+  }, [session, load])
+
+  const handleUpload = async (file: File | undefined) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch('/api/prescriptions', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) {
+        toast(data.error || 'Upload failed', { kind: 'error' })
+        return
+      }
+      toast('Prescription uploaded! Our pharmacist will review it within 2–4 hours.', { kind: 'success' })
+      load()
+    } catch {
+      toast('Network error — please try again', { kind: 'error' })
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const setField = (key: keyof typeof EMPTY_ADDRESS) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => setAddress(a => ({ ...a, [key]: e.target.value }))
+
+  const confirmOrder = async (orderId: string) => {
+    if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
+      toast('Please fill in your delivery details', { kind: 'info' })
+      return
+    }
+    setPlacing(true)
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderId, action: 'confirm', address }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast(data.error || 'Could not confirm order', { kind: 'error' })
+        return
+      }
+      toast(`Order ${data.order.number} confirmed! Pay cash on delivery.`, { kind: 'success' })
+      setConfirmingId(null)
+      load()
+    } catch {
+      toast('Network error — please try again', { kind: 'error' })
+    } finally {
+      setPlacing(false)
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="text-center mb-10">
@@ -36,35 +107,107 @@ export default function UploadRxPage() {
         </div>
         <h1 className="font-display font-bold text-3xl text-fg">Upload Your Prescription</h1>
         <p className="text-muted mt-3 max-w-xl mx-auto">
-          Prescriptions are uploaded during checkout, so they stay attached to your order and our
-          pharmacist can verify them right away. Here&apos;s how it works:
+          Upload a photo or PDF of your prescription. Our licensed pharmacist reads it, prepares your
+          order with the right medicines, and you just confirm it — no searching needed.
         </p>
       </div>
 
-      <ol className="space-y-4 mb-10">
-        {STEPS.map((s, i) => (
-          <li key={s.title} className="card p-5 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary-soft text-primary flex items-center justify-center shrink-0">
-              {s.icon}
-            </div>
-            <div>
-              <p className="font-semibold text-fg text-sm">
-                {i + 1}. {s.title}
-              </p>
-              <p className="text-sm text-muted mt-1">{s.desc}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      {authStatus === 'unauthenticated' && (
+        <div className="card p-8 text-center">
+          <p className="text-fg font-semibold mb-2">Sign in to upload your prescription</p>
+          <p className="text-sm text-muted mb-5">We link your prescription to your account so you can track it.</p>
+          <Link href="/login?callbackUrl=/upload-rx" className={buttonVariants('primary', 'lg')}>
+            Sign In with Mobile Number
+          </Link>
+        </div>
+      )}
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Link href="/medicines" className={buttonVariants('primary', 'lg')}>
-          Browse Medicines
-        </Link>
-        <Link href="/cart" className={buttonVariants('outline', 'lg')}>
-          Go to My Cart
-        </Link>
-      </div>
+      {session?.user && (
+        <>
+          <div
+            className="card border-2 border-dashed p-8 text-center cursor-pointer hover:border-primary transition-colors mb-8"
+            onClick={() => fileRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && fileRef.current?.click()}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,application/pdf"
+              className="hidden"
+              onChange={e => handleUpload(e.target.files?.[0])}
+            />
+            <Upload size={28} className="mx-auto text-primary mb-3" aria-hidden />
+            <p className="font-semibold text-fg text-sm">Click to upload your prescription</p>
+            <p className="text-xs text-muted mt-1">JPG, PNG or PDF · Max 10MB</p>
+            <Button variant="outline" size="sm" className="mt-4 px-6" disabled={uploading}>
+              {uploading ? 'Uploading…' : 'Choose File'}
+            </Button>
+          </div>
+
+          <h2 className="font-display font-semibold text-lg text-fg mb-4">My Prescriptions</h2>
+          {!loaded && <p className="text-sm text-muted">Loading…</p>}
+          {loaded && items.length === 0 && (
+            <p className="text-sm text-muted">No prescriptions uploaded yet.</p>
+          )}
+          <div className="space-y-4">
+            {items.map(rx => {
+              const badge = RX_BADGE[rx.status]
+              const awaiting = rx.order?.status === 'AWAITING_CONFIRMATION'
+              return (
+                <div key={rx.id} className="card p-5">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="text-sm font-semibold text-fg">
+                        Prescription · {new Date(rx.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                      {rx.order && (
+                        <p className="text-xs text-muted mt-0.5">
+                          Order <span className="font-mono">{rx.order.number}</span> · {formatPrice(rx.order.total)}
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant={badge.variant}>{badge.icon} {badge.label}</Badge>
+                  </div>
+
+                  {awaiting && rx.order && (
+                    <div className="mt-4 bg-primary-soft rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-fg mb-1">
+                        <Package size={16} className="text-primary" aria-hidden />
+                        Your order is ready — total {formatPrice(rx.order.total)}
+                      </div>
+                      <p className="text-xs text-muted mb-3">
+                        Our pharmacist prepared this order from your prescription. Confirm to place it (cash on delivery).
+                      </p>
+                      {confirmingId === rx.order.id ? (
+                        <div className="space-y-3">
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            <Input label="Full Name" name="name" value={address.name} onChange={setField('name')} />
+                            <Input label="Phone Number" name="phone" type="tel" inputMode="numeric" value={address.phone} onChange={setField('phone')} />
+                            <Input label="Address Line 1" name="address1" value={address.line1} onChange={setField('line1')} />
+                            <Input label="Address Line 2 (optional)" name="address2" value={address.line2} onChange={setField('line2')} />
+                            <Input label="City" name="city" value={address.city} onChange={setField('city')} />
+                            <Input label="PIN Code" name="pincode" inputMode="numeric" maxLength={6} value={address.pincode} onChange={setField('pincode')} />
+                          </div>
+                          <div className="flex gap-3">
+                            <Button size="sm" onClick={() => confirmOrder(rx.order!.id)} disabled={placing}>
+                              {placing ? 'Placing…' : 'Confirm Order'}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button size="sm" onClick={() => setConfirmingId(rx.order!.id)}>Review & Confirm</Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }
