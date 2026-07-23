@@ -15,11 +15,12 @@ export async function saveUpload(
   data: Buffer,
   contentType: string
 ): Promise<string> {
-  const bucket = process.env.AWS_S3_BUCKET
+  // Amplify reserves the AWS_ prefix for env vars, so also accept S3_BUCKET/REGION
+  const bucket = process.env.AWS_S3_BUCKET || process.env.S3_BUCKET
 
   if (bucket) {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
-    const client = new S3Client({ region: process.env.AWS_REGION || 'ap-south-1' })
+    const client = new S3Client({ region: process.env.AWS_REGION || process.env.REGION || 'ap-south-1' })
     const key = `prescriptions/${name}`
     await client.send(new PutObjectCommand({
       Bucket: bucket,
