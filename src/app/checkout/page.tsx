@@ -18,7 +18,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [payMethod, setPayMethod] = useState('upi')
   const { items, total, clearCart } = useCartStore()
-  const [ordered, setOrdered] = useState<{ number: string } | null>(null)
+  const [ordered, setOrdered] = useState<{ number: string; id: string; status: string } | null>(null)
   const [address, setAddress] = useState(EMPTY_ADDRESS)
   const [placing, setPlacing] = useState(false)
   const subtotal = total()
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
         return
       }
       clearCart()
-      setOrdered({ number: data.order.number })
+      setOrdered({ number: data.order.number, id: data.order.id, status: data.order.status })
     } catch {
       toast('Network error — is the dev server and database running?', { kind: 'error' })
     } finally {
@@ -65,7 +65,14 @@ export default function CheckoutPage() {
       <h1 className="font-display font-bold text-3xl text-fg mb-3">Order Placed!</h1>
       <p className="text-muted mb-2">Order ID: <strong className="text-fg">{ordered.number}</strong></p>
       <p className="text-muted mb-6 text-sm">Our pharmacist will review your prescription within 2–4 hours. You&apos;ll receive a WhatsApp confirmation.</p>
-      <a href="/account" className={buttonVariants('primary', 'lg')}>Track My Order</a>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/account" className={buttonVariants('primary', 'lg')}>Track My Order</a>
+        {ordered.status !== 'PENDING_RX' && (
+          <a href={`/api/orders/invoice?id=${ordered.id}`} className={buttonVariants('outline', 'lg')}>
+            Download GST Invoice
+          </a>
+        )}
+      </div>
     </div>
   )
 

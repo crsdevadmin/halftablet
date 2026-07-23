@@ -50,6 +50,34 @@ export default function UploadRxPage() {
   const [editItems, setEditItems] = useState<SelItem[]>([])
   const [medQuery, setMedQuery] = useState('')
   const [savingSel, setSavingSel] = useState(false)
+  const [explainRxId, setExplainRxId] = useState<string | null>(null)
+  const [explanation, setExplanation] = useState('')
+  const [explaining, setExplaining] = useState(false)
+
+  const explain = async (rxId: string, language: string) => {
+    setExplainRxId(rxId)
+    setExplaining(true)
+    setExplanation('')
+    try {
+      const res = await fetch('/api/ai/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prescriptionId: rxId, language }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast(data.error || 'Could not explain right now', { kind: 'error' })
+        setExplainRxId(null)
+        return
+      }
+      setExplanation(data.explanation)
+    } catch {
+      toast('Network error — please try again', { kind: 'error' })
+      setExplainRxId(null)
+    } finally {
+      setExplaining(false)
+    }
+  }
 
   const searchResults = medQuery.trim()
     ? MEDICINES.filter(m => {
@@ -354,6 +382,43 @@ export default function UploadRxPage() {
                     <p className="text-xs text-muted mt-2">
                       Read from your Rx: {rx.aiSuggestions!.map(s => s.name).join(', ')}
                     </p>
+                  )}
+
+                  {(initialSelection(rx).length > 0 || (rx.requestedItems?.length ?? 0) > 0) && (
+                    <div className="mt-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold text-fg">🗣️ Explain my medicines:</span>
+                        {(['english', 'tamil', 'hindi'] as const).map(lang => (
+                          <button
+                            key={lang}
+                            className="text-xs px-3 py-1 rounded-full border border-border hover:border-primary hover:text-primary transition-colors capitalize"
+                            onClick={() => explain(rx.id, lang)}
+                            disabled={explaining}
+                          >
+                            {lang === 'english' ? 'English' : lang === 'tamil' ? 'தமிழ்' : 'हिन्दी'}
+                          </button>
+                        ))}
+                      </div>
+                      {explainRxId === rx.id && (
+                        <div className="mt-3 bg-primary-soft rounded-xl p-4 text-sm text-fg whitespace-pre-wrap">
+                          {explaining ? 'Reading your medicines and writing a simple explanation…' : explanation}
+                          {!explaining && (
+                            <p className="text-xs text-muted mt-3">
+                              ⚠️ General information only — always follow your doctor&apos;s and pharmacist&apos;s advice.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {rx.order && rx.order.status !== 'AWAITING_CONFIRMATION' && rx.order.status !== 'CANCELLED' && (
+                    <a
+                      href={`/api/orders/invoice?id=${rx.order.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline mt-3"
+                    >
+                      <FileText size={14} aria-hidden /> Download GST Invoice
+                    </a>
                   )}
 
                   {awaiting && rx.order && (
