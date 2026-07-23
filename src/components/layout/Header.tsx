@@ -94,6 +94,11 @@ export function Header() {
 
             {session?.user ? (
               <div className="hidden sm:flex items-center gap-1">
+                {(session.user.role === 'ADMIN' || session.user.role === 'PHARMACIST') && (
+                  <Link href="/admin" className="btn-secondary text-sm px-3 py-2 rounded-xl">
+                    Pharmacy Desk
+                  </Link>
+                )}
                 <Link href="/account" className="btn-ghost flex items-center gap-1.5 text-sm px-3 py-2">
                   <User size={16} aria-hidden />
                   <span className="max-w-[100px] truncate">{session.user.name}</span>
@@ -137,6 +142,15 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'PHARMACIST') && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className="block text-sm font-semibold text-primary px-3 py-2.5 rounded-lg hover:bg-primary-soft transition-colors"
+              >
+                Pharmacy Desk →
+              </Link>
+            )}
             {session?.user ? (
               <button
                 onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/' }) }}
