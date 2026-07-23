@@ -12,6 +12,8 @@ frontend:
         # Sync schema to RDS (no migration files in repo), seed (idempotent upserts), then build
         - npx prisma db push --accept-data-loss
         - npx prisma db seed
+        # Amplify env vars exist only at build time — bake them in for the SSR runtime
+        - env | grep -e DATABASE_URL -e NEXTAUTH_SECRET -e NEXTAUTH_URL -e OTP_DEBUG -e ANTHROPIC_API_KEY -e S3_BUCKET -e REGION >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
