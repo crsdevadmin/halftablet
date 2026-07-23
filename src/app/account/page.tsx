@@ -9,7 +9,7 @@ import { Button, buttonVariants } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { toast } from '@/components/ui/Toaster'
 
-const EMPTY_ADDRESS = { name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' }
+import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
 
 interface MyRefill {
   id: string
@@ -117,6 +117,7 @@ export default function DashboardPage() {
         toast(data.error || 'Could not confirm order', { kind: 'error' })
         return
       }
+      saveAddress(address)
       toast(`Order ${data.order.number} confirmed! Pay cash on delivery.`, { kind: 'success' })
       setConfirmingId(null)
       load()
@@ -253,7 +254,7 @@ export default function DashboardPage() {
               )}
               <div className="flex items-center gap-4">
                 {o.status === 'AWAITING_CONFIRMATION' && confirmingId !== o.id && (
-                  <button onClick={() => setConfirmingId(o.id)}
+                  <button onClick={() => { setConfirmingId(o.id); setAddress(loadSavedAddress()) }}
                     className="text-sm text-primary font-semibold hover:underline">
                     Review & Confirm →
                   </button>

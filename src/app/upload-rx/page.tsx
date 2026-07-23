@@ -35,7 +35,7 @@ const RX_BADGE: Record<RxItem['status'], { variant: BadgeVariant; label: string;
   REJECTED: { variant: 'danger', label: 'Rejected', icon: <XCircle size={13} aria-hidden /> },
 }
 
-const EMPTY_ADDRESS = { name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' }
+import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
 
 export default function UploadRxPage() {
   const { data: session, status: authStatus } = useSession()
@@ -180,6 +180,7 @@ export default function UploadRxPage() {
         toast(data.error || 'Could not confirm order', { kind: 'error' })
         return
       }
+      saveAddress(address)
       toast(`Order ${data.order.number} confirmed! Pay cash on delivery.`, { kind: 'success' })
       setConfirmingId(null)
       load()
@@ -448,7 +449,7 @@ export default function UploadRxPage() {
                           </div>
                         </div>
                       ) : (
-                        <Button size="sm" onClick={() => setConfirmingId(rx.order!.id)}>Review & Confirm</Button>
+                        <Button size="sm" onClick={() => { setConfirmingId(rx.order!.id); setAddress(loadSavedAddress()) }}>Review & Confirm</Button>
                       )}
                     </div>
                   )}

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice } from '@/lib/utils'
@@ -12,7 +12,7 @@ import { SafetyWarnings } from '@/components/cart/SafetyWarnings'
 
 const STEPS = ['Cart Review', 'Delivery & Rx', 'Payment']
 
-const EMPTY_ADDRESS = { name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' }
+import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -22,6 +22,9 @@ export default function CheckoutPage() {
   const [ordered, setOrdered] = useState<{ number: string; id: string; status: string } | null>(null)
   const [address, setAddress] = useState(EMPTY_ADDRESS)
   const [placing, setPlacing] = useState(false)
+
+  // Prefill the saved delivery address
+  useEffect(() => { setAddress(loadSavedAddress()) }, [])
   const subtotal = total()
   const delivery = subtotal > 999 ? 0 : 99
 
@@ -49,6 +52,7 @@ export default function CheckoutPage() {
         toast(data.error || 'Order failed', { kind: 'error' })
         return
       }
+      saveAddress(address)
       clearCart()
       setOrdered({ number: data.order.number, id: data.order.id, status: data.order.status })
     } catch {
