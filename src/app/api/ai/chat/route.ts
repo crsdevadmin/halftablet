@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MEDICINES } from '@/lib/mockData'
 
-const SYSTEM_PROMPT = `You are HalfTablet AI, the helpful assistant for HalfTablet — India's intelligent online pharmacy specialising in specialty medicines for cancer, kidney disease, HIV/AIDS, hepatitis, heart conditions, arthritis, diabetes, and transplant care.
+const SYSTEM_PROMPT = `You are HalfTablet AI, the helpful assistant for HalfTablet — India's oncology-focused online pharmacy for cancer medicines (targeted therapy, immunotherapy, chemotherapy, hormonal therapy) and supportive care.
 
 You help patients:
 1. Find medicines by name, salt name, or condition

@@ -2,31 +2,28 @@ import Link from 'next/link'
 
 const links = {
   Medicines: [
-    { label: 'Cancer Medicines', href: '/medicines?category=cancer' },
-    { label: 'Kidney Care', href: '/medicines?category=kidney' },
-    { label: 'HIV/AIDS', href: '/medicines?category=hiv' },
-    { label: 'Hepatitis', href: '/medicines?category=hepatitis' },
+    { label: 'Blood Cancers', href: '/medicines?category=blood-cancer' },
+    { label: 'Breast Cancer', href: '/medicines?category=breast-cancer' },
+    { label: 'Lung Cancer', href: '/medicines?category=lung-cancer' },
+    { label: 'Supportive Care', href: '/medicines?category=supportive' },
     { label: 'All Medicines', href: '/medicines' },
   ],
   Services: [
-    { label: 'Patient Assistance', href: '/patient-assistance' },
-    { label: 'Doctor Consult', href: '/consult' },
-    { label: 'Lab Tests', href: '/labs' },
-    { label: 'Offers & Discounts', href: '/offers' },
     { label: 'Upload Prescription', href: '/upload-rx' },
-  ],
-  Company: [
-    { label: 'About HalfTablet', href: '/about' },
+    { label: 'Patient Assistance', href: '/patient-assistance' },
+    { label: 'Offers & Discounts', href: '/offers' },
     { label: 'Health Library', href: '/health' },
-    { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Contact Us', href: '/contact' },
   ],
-  Legal: [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms & Conditions', href: '/terms' },
-    { label: 'Return Policy', href: '/returns' },
-    { label: 'Shipping Policy', href: '/shipping' },
+  Conditions: [
+    { label: 'All Cancer Types', href: '/conditions' },
+    { label: 'Prostate & Kidney', href: '/medicines?category=uro-cancer' },
+    { label: 'Ovarian & Cervical', href: '/medicines?category=gynae-cancer' },
+    { label: 'GI & Liver', href: '/medicines?category=gi-cancer' },
+  ],
+  Account: [
+    { label: 'My Orders', href: '/account' },
+    { label: 'My Cart', href: '/cart' },
+    { label: 'Sign In', href: '/login' },
   ],
 }
 
@@ -42,7 +39,7 @@ export function Footer() {
               <span className="font-display font-bold text-2xl text-brand-orange">Tablet</span>
             </div>
             <p className="text-sm leading-relaxed mb-4">
-              India&apos;s intelligent online pharmacy. 5,000+ specialty medicines. Up to 85% off. AI-powered search.
+              India&apos;s oncology pharmacy. Cancer medicines up to 85% off, pharmacist-verified, cold-chain delivered.
             </p>
             <div className="space-y-1 text-xs">
               <p>📍 Chennai, Tamil Nadu, India</p>

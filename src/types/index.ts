@@ -24,16 +24,14 @@ export interface Medicine {
 }
 
 export type MedicineCategory =
-  | 'cancer'
-  | 'kidney'
-  | 'hiv'
-  | 'hepatitis'
-  | 'heart'
-  | 'arthritis'
-  | 'diabetes'
-  | 'transplant'
-  | 'osteoporosis'
-  | 'general'
+  | 'blood-cancer'
+  | 'breast-cancer'
+  | 'lung-cancer'
+  | 'gi-cancer'
+  | 'uro-cancer'
+  | 'gynae-cancer'
+  | 'other-cancer'
+  | 'supportive'
 
 export interface CartItem {
   medicine: Medicine

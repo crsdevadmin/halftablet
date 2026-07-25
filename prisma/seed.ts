@@ -24,11 +24,7 @@ async function main() {
   // Medicines
   for (const m of MEDICINES) {
     const stock = STOCK.find(s => s.medicineId === m.id)
-    await prisma.medicine.upsert({
-      where: { id: m.id },
-      update: {},
-      create: {
-        id: m.id,
+    const data = {
         name: m.name,
         genericName: m.genericName,
         manufacturer: m.manufacturer,
@@ -49,11 +45,19 @@ async function main() {
         uses: m.uses,
         sideEffects: m.sideEffects,
         tags: m.tags,
-      },
+    }
+    // update as well as create: catalog changes must overwrite old seeded rows
+    await prisma.medicine.upsert({
+      where: { id: m.id },
+      update: data,
+      create: { id: m.id, ...data },
     })
 
-    // Batches
-    for (const b of stock?.batches ?? []) {
+    // Batches — from STOCK when defined, otherwise a default starter batch
+    const batches = stock?.batches?.length
+      ? stock.batches
+      : [{ batchNo: `${m.id.toUpperCase()}-SEED1`, expiry: new Date(Date.now() + 540 * 86_400_000).toISOString(), qty: 100 }]
+    for (const b of batches) {
       await prisma.batch.upsert({
         where: { batchNo: b.batchNo },
         update: {},

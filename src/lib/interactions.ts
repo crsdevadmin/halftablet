@@ -31,30 +31,17 @@ interface InteractionRule {
 }
 
 const INTERACTIONS: InteractionRule[] = [
-  {
-    a: 'imatinib',
-    b: 'tacrolimus',
-    severity: 'serious',
-    note: 'Imatinib can raise tacrolimus blood levels. Your doctor may need to monitor levels closely.',
-  },
-  {
-    a: 'amlodipine',
-    b: 'tacrolimus',
-    severity: 'caution',
-    note: 'Amlodipine may increase tacrolimus levels. Blood level monitoring is advisable.',
-  },
-  {
-    a: 'methotrexate',
-    b: 'tenofovir',
-    severity: 'caution',
-    note: 'Both medicines can affect the kidneys. Kidney function should be monitored when used together.',
-  },
-  {
-    a: 'imatinib',
-    b: 'methotrexate',
-    severity: 'caution',
-    note: 'Combined use may increase side effects on blood counts. Regular blood tests are advisable.',
-  },
+  // Same-class duplicates a doctor would rarely prescribe together
+  { a: 'palbociclib', b: 'ribociclib', severity: 'serious', note: 'These are both CDK4/6 inhibitors — they are not taken together.' },
+  { a: 'letrozole', b: 'anastrozole', severity: 'serious', note: 'These are both aromatase inhibitors — only one is used at a time.' },
+  { a: 'gefitinib', b: 'erlotinib', severity: 'serious', note: 'These are both EGFR inhibitors — only one is used at a time.' },
+  { a: 'nivolumab', b: 'pembrolizumab', severity: 'serious', note: 'These are both PD-1 immunotherapies — they are not combined.' },
+  { a: 'abiraterone', b: 'enzalutamide', severity: 'caution', note: 'These prostate cancer medicines are usually used one after the other, not together.' },
+  { a: 'letrozole', b: 'tamoxifen', severity: 'caution', note: 'Taking these together can reduce effectiveness — they are normally used in sequence.' },
+  // True interactions within the catalog
+  { a: 'capecitabine', b: 'methotrexate', severity: 'caution', note: 'Combined use increases effects on blood counts. Regular blood tests are advisable.' },
+  { a: 'methotrexate', b: 'hydroxyurea', severity: 'caution', note: 'Both can lower blood counts — combined use needs close monitoring.' },
+  { a: 'lenalidomide', b: 'pomalidomide', severity: 'serious', note: 'These are related immunomodulators — only one is used at a time.' },
 ]
 
 export function checkCartSafety(medicines: Medicine[]): SafetyWarning[] {

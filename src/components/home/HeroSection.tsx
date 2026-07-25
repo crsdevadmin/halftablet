@@ -10,16 +10,16 @@ export function HeroSection() {
           {/* Left content */}
           <div>
             <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-6">
-              🇮🇳 India&apos;s Intelligent Online Pharmacy
+              🎗️ India&apos;s Oncology Pharmacy
             </span>
             <h1 className="font-display font-bold text-4xl md:text-5xl leading-tight mb-4">
-              Your Medicine.<br />
+              Cancer Medicines.<br />
               <span className="text-orange-400">Delivered with Care.</span>
             </h1>
             <p className="text-teal-100 text-lg mb-8 leading-relaxed">
-              5,000+ specialty medicines for cancer, kidney, HIV & more.
-              Up to <strong className="text-white">85% off</strong> with AI-powered search.
-              Pan-India delivery.
+              Targeted therapy, chemo, immunotherapy & supportive care —
+              up to <strong className="text-white">85% off</strong> with pharmacist-verified prescriptions.
+              Pan-India cold-chain delivery.
             </p>
 
             {/* Search */}
@@ -80,7 +80,7 @@ export function HeroSection() {
         {/* Stats bar */}
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/20 pt-10">
           {[
-            { value: '5,000+', label: 'Specialty Medicines' },
+            { value: '500+', label: 'Cancer Medicines' },
             { value: '85%', label: 'Max Discount' },
             { value: '2,000+', label: 'Cities Served' },
             { value: '50,000+', label: 'Happy Patients' },
