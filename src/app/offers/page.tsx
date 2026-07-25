@@ -1,12 +1,12 @@
 import { Tag, Clock } from 'lucide-react'
 
 const OFFERS = [
-  { code: 'CANCER15', desc: '15% extra off on all cancer medicines', category: 'Cancer', expiry: '30 Jun 2026', color: 'from-rose-500 to-red-600', saves: '₹450 avg' },
-  { code: 'KIDNEY10', desc: '10% off kidney care + free delivery', category: 'Kidney', expiry: '25 Jun 2026', color: 'from-blue-500 to-blue-700', saves: '₹280 avg' },
-  { code: 'HIV85',    desc: 'Flat 85% off on HIV/AIDS medicines', category: 'HIV/AIDS', expiry: 'No expiry', color: 'from-purple-500 to-violet-700', saves: '₹2,380 avg' },
-  { code: 'NEW200',   desc: '₹200 off your first order above ₹999', category: 'All', expiry: '31 Jul 2026', color: 'from-teal-500 to-green-600', saves: '₹200 flat' },
-  { code: 'HEPFREE',  desc: 'Free delivery on all hepatitis medicines', category: 'Hepatitis', expiry: '15 Jul 2026', color: 'from-amber-500 to-yellow-600', saves: '₹99 delivery' },
-  { code: 'PAP2026',  desc: 'Patient Assistance: apply for free medicines', category: 'All Critical', expiry: 'Ongoing', color: 'from-indigo-500 to-blue-600', saves: 'Up to 100%' },
+  { code: 'TARGET15',  desc: '15% extra off on targeted therapy (TKIs & CDK4/6)', category: 'Targeted Therapy', expiry: '30 Aug 2026', color: 'from-rose-500 to-red-600', saves: '₹1,200 avg' },
+  { code: 'CHEMOFREE', desc: 'Free cold-chain delivery on all chemo & biologics', category: 'Chemotherapy', expiry: 'No expiry', color: 'from-blue-500 to-blue-700', saves: '₹99 delivery' },
+  { code: 'HORMONE10', desc: '10% off hormonal therapy (letrozole, tamoxifen & more)', category: 'Hormonal Therapy', expiry: '15 Aug 2026', color: 'from-purple-500 to-violet-700', saves: '₹35 avg' },
+  { code: 'NEW200',    desc: '₹200 off your first order above ₹999', category: 'All', expiry: '31 Aug 2026', color: 'from-teal-500 to-green-600', saves: '₹200 flat' },
+  { code: 'CAREPLUS',  desc: '20% off supportive care — anti-nausea, G-CSF, bone health', category: 'Supportive Care', expiry: 'Ongoing', color: 'from-amber-500 to-orange-600', saves: '₹380 avg' },
+  { code: 'PAP2026',   desc: 'Patient Assistance: apply for free cancer medicines', category: 'All Patients', expiry: 'Ongoing', color: 'from-indigo-500 to-blue-600', saves: 'Up to 100%' },
 ]
 
 export default function OffersPage() {

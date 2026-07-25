@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { HEALTH_ARTICLES } from '@/lib/mockData'
 import { Clock, Search } from 'lucide-react'
 
-const CATEGORIES = ['All', 'Cancer Care', 'Kidney Care', 'HIV/AIDS', 'Hepatitis', 'Heart Health', 'Arthritis', 'Financial Aid']
+const CATEGORIES = ['All', 'Blood Cancers', 'Breast Cancer', 'Supportive Care', 'Treatment Costs']
 
 export default function HealthLibraryPage() {
   return (

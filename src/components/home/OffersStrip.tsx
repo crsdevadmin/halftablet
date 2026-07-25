@@ -2,10 +2,10 @@ import Link from 'next/link'
 import { Tag } from 'lucide-react'
 
 const OFFERS = [
-  { code: 'CANCER15', desc: '15% extra off on all cancer medicines', expiry: '30 Jun', color: 'from-rose-500 to-red-600' },
-  { code: 'KIDNEY10', desc: '10% off kidney care + free delivery', expiry: '25 Jun', color: 'from-blue-500 to-blue-700' },
-  { code: 'HIV85',    desc: 'Flat 85% off on HIV/AIDS medicines', expiry: 'No expiry', color: 'from-purple-500 to-violet-700' },
-  { code: 'NEW200',   desc: '₹200 off your first order above ₹999', expiry: '31 Jul', color: 'from-teal-500 to-green-600' },
+  { code: 'TARGET15',  desc: '15% extra off on targeted therapy', expiry: '30 Aug', color: 'from-rose-500 to-red-600' },
+  { code: 'CHEMOFREE', desc: 'Free cold-chain delivery on chemo & biologics', expiry: 'No expiry', color: 'from-blue-500 to-blue-700' },
+  { code: 'CAREPLUS',  desc: '20% off supportive care medicines', expiry: 'Ongoing', color: 'from-amber-500 to-orange-600' },
+  { code: 'NEW200',    desc: '₹200 off your first order above ₹999', expiry: '31 Aug', color: 'from-teal-500 to-green-600' },
 ]
 
 export function OffersStrip() {

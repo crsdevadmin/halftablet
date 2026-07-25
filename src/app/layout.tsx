@@ -9,7 +9,7 @@ import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
   title: { default: 'HalfTablet — India\'s Intelligent Online Pharmacy', template: '%s | HalfTablet' },
-  description: 'Buy specialty medicines for cancer, kidney, HIV, hepatitis & more. Up to 85% off. AI-powered search. Pan-India delivery.',
+  description: 'India\'s oncology pharmacy — cancer medicines up to 85% off. Targeted therapy, chemo, immunotherapy & supportive care. Pharmacist-verified, pan-India cold-chain delivery.',
   keywords: ['online pharmacy india', 'cancer medicine', 'specialty pharmacy', 'buy medicine online'],
   openGraph: {
     type: 'website',

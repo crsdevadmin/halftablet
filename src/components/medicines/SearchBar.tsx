@@ -5,7 +5,7 @@ import { Search, Mic, X } from 'lucide-react'
 import { MEDICINES } from '@/lib/mockData'
 import { cn } from '@/lib/utils'
 
-const QUICK_SEARCHES = ['Imatinib', 'Cancer medicines', 'HIV treatment', 'Kidney care', 'Trastuzumab']
+const QUICK_SEARCHES = ['Imatinib', 'Letrozole', 'Trastuzumab', 'Anti-nausea', 'Palbociclib']
 
 interface Props {
   large?: boolean
