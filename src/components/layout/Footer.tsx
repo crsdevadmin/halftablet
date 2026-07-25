@@ -38,8 +38,8 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-1 mb-4">
-              <span className="font-display font-bold text-2xl text-white">Dr</span>
-              <span className="font-display font-bold text-2xl text-brand-orange">Med</span>
+              <span className="font-display font-bold text-2xl text-white">Half</span>
+              <span className="font-display font-bold text-2xl text-brand-orange">Tablet</span>
             </div>
             <p className="text-sm leading-relaxed mb-4">
               India&apos;s intelligent online pharmacy. 5,000+ specialty medicines. Up to 85% off. AI-powered search.

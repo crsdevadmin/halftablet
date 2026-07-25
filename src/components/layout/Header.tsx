@@ -41,8 +41,8 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-1 flex-shrink-0" aria-label="HalfTablet home">
-            <span className="font-display font-bold text-2xl text-primary">Dr</span>
-            <span className="font-display font-bold text-2xl text-cta">Med</span>
+            <span className="font-display font-bold text-2xl text-primary">Half</span>
+            <span className="font-display font-bold text-2xl text-cta">Tablet</span>
           </Link>
 
           {/* Inline search — the #1 pharmacy task, always one click away */}

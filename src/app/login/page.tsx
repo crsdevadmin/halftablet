@@ -67,7 +67,7 @@ function LoginForm() {
     <div className="max-w-sm mx-auto px-4 py-16">
       <div className="text-center mb-8">
         <p className="font-display font-bold text-3xl">
-          <span className="text-primary">Dr</span><span className="text-cta">Med</span>
+          <span className="text-primary">Half</span><span className="text-cta">Tablet</span>
         </p>
         <h1 className="font-display font-bold text-xl text-fg mt-4">Sign in with your phone</h1>
         <p className="text-sm text-muted mt-1">
