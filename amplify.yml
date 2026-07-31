@@ -15,7 +15,7 @@ frontend:
         - DATABASE_URL="${MIGRATE_DATABASE_URL:-$DATABASE_URL}" npx prisma db seed
         # Amplify env vars exist only at build time — bake them in for the SSR runtime
         # (anchored ^ so MIGRATE_DATABASE_URL with the master password is NOT baked in)
-        - env | grep -e '^DATABASE_URL=' -e '^NEXTAUTH_SECRET=' -e '^NEXTAUTH_URL=' -e '^OTP_DEBUG=' -e '^ANTHROPIC_API_KEY=' -e '^S3_BUCKET=' -e '^REGION=' >> .env.production
+        - env | grep -e '^DATABASE_URL=' -e '^NEXTAUTH_SECRET=' -e '^NEXTAUTH_URL=' -e '^OTP_DEBUG=' -e '^ANTHROPIC_API_KEY=' -e '^S3_BUCKET=' -e '^REGION=' -e '^RAZORPAY_KEY_ID=' -e '^RAZORPAY_KEY_SECRET=' -e '^RAZORPAY_WEBHOOK_SECRET=' >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next

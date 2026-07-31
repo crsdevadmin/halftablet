@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice } from '@/lib/utils'
-import { CheckCircle, Upload, CreditCard, Smartphone, Banknote } from 'lucide-react'
+import { CheckCircle, Upload, Smartphone, Banknote } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { toast } from '@/components/ui/Toaster'
 import { cn } from '@/lib/utils'
 import { SafetyWarnings } from '@/components/cart/SafetyWarnings'
+import { payForOrder } from '@/lib/razorpay'
 
 const STEPS = ['Cart Review', 'Delivery & Rx', 'Payment']
 
@@ -17,7 +18,7 @@ import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
 export default function CheckoutPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
-  const [payMethod, setPayMethod] = useState('upi')
+  const [payMethod, setPayMethod] = useState('online')
   const { items, total, clearCart } = useCartStore()
   const [ordered, setOrdered] = useState<{ number: string; id: string; status: string } | null>(null)
   const [address, setAddress] = useState(EMPTY_ADDRESS)
@@ -53,6 +54,24 @@ export default function CheckoutPage() {
         return
       }
       saveAddress(address)
+
+      // Online payment: open Razorpay before clearing the cart, so a failed
+      // payment doesn't leave the patient with an empty cart.
+      if (payMethod === 'online' && data.order.status !== 'PENDING_RX') {
+        const result = await payForOrder({ orderId: data.order.id, address })
+        if (!result.ok) {
+          toast(
+            result.cancelled
+              ? `Payment cancelled. Order ${data.order.number} is saved — pay anytime from My Account.`
+              : result.error || 'Payment failed — you can retry from My Account',
+            { kind: result.cancelled ? 'info' : 'error' }
+          )
+          clearCart()
+          router.push('/account')
+          return
+        }
+      }
+
       clearCart()
       setOrdered({ number: data.order.number, id: data.order.id, status: data.order.status })
     } catch {
@@ -179,8 +198,7 @@ export default function CheckoutPage() {
             <div className="card p-6 space-y-5">
               <h2 className="font-display font-semibold text-lg text-fg">Choose Payment Method</h2>
               {[
-                { id: 'upi', icon: <Smartphone size={18} aria-hidden />, label: 'UPI', desc: 'PhonePe, GPay, Paytm & more' },
-                { id: 'card', icon: <CreditCard size={18} aria-hidden />, label: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay' },
+                { id: 'online', icon: <Smartphone size={18} aria-hidden />, label: 'Pay Online', desc: 'UPI, cards & netbanking via Razorpay' },
                 { id: 'cod', icon: <Banknote size={18} aria-hidden />, label: 'Cash on Delivery', desc: 'Pay when your order arrives' },
               ].map(m => (
                 <label key={m.id} className={cn(
@@ -197,7 +215,7 @@ export default function CheckoutPage() {
                 </label>
               ))}
               <Button size="lg" className="w-full mt-2" onClick={handleOrder} loading={placing} disabled={items.length === 0}>
-                Place Order · {formatPrice(subtotal + delivery)}
+                {payMethod === 'online' ? 'Pay' : 'Place Order'} · {formatPrice(subtotal + delivery)}
               </Button>
               <p className="text-center text-xs text-muted">
                 🔒 Secured by Razorpay · 256-bit SSL encryption

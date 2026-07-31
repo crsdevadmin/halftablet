@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input'
 import { toast } from '@/components/ui/Toaster'
 
 import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
+import { payForOrder } from '@/lib/razorpay'
 
 interface MyRefill {
   id: string
@@ -24,6 +25,7 @@ interface MyOrder {
   id: string
   number: string
   status: string
+  paymentStatus?: string
   total: number
   createdAt: string
   items: { quantity: number; medicine: { name: string } }[]
@@ -98,6 +100,28 @@ export default function DashboardPage() {
       { kind: 'success' }
     )
     load()
+  }
+
+  const payOnline = async (orderId: string) => {
+    if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
+      toast('Please fill in your delivery details', { kind: 'info' })
+      return
+    }
+    setPlacing(true)
+    try {
+      const result = await payForOrder({ orderId, address })
+      if (result.cancelled) return
+      if (!result.ok) {
+        toast(result.error || 'Payment failed', { kind: 'error' })
+        return
+      }
+      saveAddress(address)
+      toast(`Payment successful — order ${result.order?.number} confirmed!`, { kind: 'success' })
+      setConfirmingId(null)
+      load()
+    } finally {
+      setPlacing(false)
+    }
   }
 
   const confirmOrderInline = async (orderId: string) => {
@@ -224,6 +248,9 @@ export default function DashboardPage() {
                   <p className="text-xs text-muted">Placed {formatDate(o.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {o.paymentStatus === 'PAID' && <Badge variant="success">Paid</Badge>}
+                  {o.paymentStatus === 'COD' && o.status !== 'AWAITING_CONFIRMATION' && <Badge variant="neutral">Cash on Delivery</Badge>}
+                  {o.paymentStatus === 'FAILED' && <Badge variant="danger">Payment failed</Badge>}
                   <Badge variant={ui.variant}>{ui.label}</Badge>
                   <p className="font-bold text-fg">{formatPrice(o.total)}</p>
                 </div>
@@ -244,12 +271,16 @@ export default function DashboardPage() {
                     <Input label="City" name="city" value={address.city} onChange={setField('city')} />
                     <Input label="PIN Code" name="pincode" inputMode="numeric" maxLength={6} value={address.pincode} onChange={setField('pincode')} />
                   </div>
-                  <div className="flex gap-3">
-                    <Button size="sm" onClick={() => confirmOrderInline(o.id)} disabled={placing}>
-                      {placing ? 'Placing…' : 'Confirm Order (COD)'}
+                  <div className="flex gap-3 flex-wrap">
+                    <Button size="sm" onClick={() => payOnline(o.id)} disabled={placing}>
+                      {placing ? 'Please wait…' : `Pay ${formatPrice(o.total)} Online`}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                    <Button size="sm" variant="outline" onClick={() => confirmOrderInline(o.id)} disabled={placing}>
+                      Cash on Delivery
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setConfirmingId(null)}>Cancel</Button>
                   </div>
+                  <p className="text-xs text-muted">UPI, cards & netbanking via Razorpay — or pay cash when it arrives.</p>
                 </div>
               )}
               <div className="flex items-center gap-4">

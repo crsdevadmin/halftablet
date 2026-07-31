@@ -36,6 +36,7 @@ const RX_BADGE: Record<RxItem['status'], { variant: BadgeVariant; label: string;
 }
 
 import { EMPTY_ADDRESS, loadSavedAddress, saveAddress } from '@/lib/address'
+import { payForOrder } from '@/lib/razorpay'
 
 export default function UploadRxPage() {
   const { data: session, status: authStatus } = useSession()
@@ -162,6 +163,28 @@ export default function UploadRxPage() {
 
   const setField = (key: keyof typeof EMPTY_ADDRESS) =>
     (e: React.ChangeEvent<HTMLInputElement>) => setAddress(a => ({ ...a, [key]: e.target.value }))
+
+  const payOnline = async (orderId: string) => {
+    if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
+      toast('Please fill in your delivery details', { kind: 'info' })
+      return
+    }
+    setPlacing(true)
+    try {
+      const result = await payForOrder({ orderId, address })
+      if (result.cancelled) return
+      if (!result.ok) {
+        toast(result.error || 'Payment failed', { kind: 'error' })
+        return
+      }
+      saveAddress(address)
+      toast(`Payment successful — order ${result.order?.number} confirmed!`, { kind: 'success' })
+      setConfirmingId(null)
+      load()
+    } finally {
+      setPlacing(false)
+    }
+  }
 
   const confirmOrder = async (orderId: string) => {
     if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
@@ -441,11 +464,14 @@ export default function UploadRxPage() {
                             <Input label="City" name="city" value={address.city} onChange={setField('city')} />
                             <Input label="PIN Code" name="pincode" inputMode="numeric" maxLength={6} value={address.pincode} onChange={setField('pincode')} />
                           </div>
-                          <div className="flex gap-3">
-                            <Button size="sm" onClick={() => confirmOrder(rx.order!.id)} disabled={placing}>
-                              {placing ? 'Placing…' : 'Confirm Order'}
+                          <div className="flex gap-3 flex-wrap">
+                            <Button size="sm" onClick={() => payOnline(rx.order!.id)} disabled={placing}>
+                              {placing ? 'Please wait…' : `Pay ${formatPrice(rx.order!.total)} Online`}
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                            <Button size="sm" variant="outline" onClick={() => confirmOrder(rx.order!.id)} disabled={placing}>
+                              Cash on Delivery
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setConfirmingId(null)}>Cancel</Button>
                           </div>
                         </div>
                       ) : (

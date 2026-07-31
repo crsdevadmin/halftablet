@@ -12,6 +12,7 @@ interface LiveOrder {
   id: string
   number: string
   status: string // server enum, e.g. PENDING_RX
+  paymentStatus?: string
   total: number
   createdAt: string
   address: { city?: string } | null
@@ -40,6 +41,8 @@ function OrderCard({ order, onAdvance, busy }: { order: LiveOrder; onAdvance: (o
       <p className="text-xs font-mono text-faint">{order.number}</p>
       <div className="flex items-center gap-1.5 flex-wrap">
         <Badge variant="neutral">{itemCount} item{itemCount > 1 ? 's' : ''}</Badge>
+        {order.paymentStatus === 'PAID' && <Badge variant="success">Paid</Badge>}
+        {order.paymentStatus === 'COD' && <Badge variant="warning">COD</Badge>}
         {rx && (
           <a href={`/api/prescriptions/file?id=${rx.id}`} target="_blank" rel="noopener noreferrer"
              className="inline-flex">

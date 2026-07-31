@@ -92,12 +92,24 @@ model Batch {
   @@index([medicineId])
 }
 
+enum PaymentStatus {
+  COD // pay on delivery
+  PENDING // online payment started, not yet confirmed
+  PAID
+  FAILED
+  REFUNDED
+}
+
 model Order {
   id            String        @id @default(cuid())
   number        String        @unique // human-readable, e.g. ORD-2026-001252
   userId        String
   user          User          @relation(fields: [userId], references: [id])
   status        OrderStatus
+  paymentStatus PaymentStatus @default(COD)
+  razorpayOrderId   String?   @unique
+  razorpayPaymentId String?
+  paidAt        DateTime?
   subtotal      Int
   deliveryFee   Int
   total         Int
