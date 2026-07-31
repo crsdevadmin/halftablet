@@ -107,6 +107,7 @@ export async function POST(req: Request) {
           number,
           userId: isRxOrder ? forUserId : session.user.id,
           status: isRxOrder ? 'AWAITING_CONFIRMATION' : requiresRx ? 'PENDING_RX' : 'CONFIRMED',
+          paymentStatus: body?.paymentMethod === 'online' ? 'PENDING' : 'COD',
           subtotal,
           deliveryFee,
           total: subtotal + deliveryFee,

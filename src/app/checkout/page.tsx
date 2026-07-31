@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice } from '@/lib/utils'
@@ -20,9 +20,11 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [payMethod, setPayMethod] = useState('online')
   const { items, total, clearCart } = useCartStore()
-  const [ordered, setOrdered] = useState<{ number: string; id: string; status: string } | null>(null)
+  const [ordered, setOrdered] = useState<{ number: string; id: string; status: string; paid?: boolean } | null>(null)
   const [address, setAddress] = useState(EMPTY_ADDRESS)
   const [placing, setPlacing] = useState(false)
+  const [rxFile, setRxFile] = useState<File | null>(null)
+  const rxInputRef = useRef<HTMLInputElement>(null)
 
   // Prefill the saved delivery address
   useEffect(() => { setAddress(loadSavedAddress()) }, [])
@@ -41,6 +43,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: items.map(i => ({ medicineId: i.medicine.id, quantity: i.quantity })),
           address,
+          paymentMethod: payMethod,
         }),
       })
       if (res.status === 401) {
@@ -55,9 +58,26 @@ export default function CheckoutPage() {
       }
       saveAddress(address)
 
+      // Attach the prescription to the new order (best-effort — the patient
+      // can also upload later from /upload-rx)
+      if (rxFile) {
+        try {
+          const form = new FormData()
+          form.append('file', rxFile)
+          form.append('orderId', data.order.id)
+          const rxRes = await fetch('/api/prescriptions', { method: 'POST', body: form })
+          if (!rxRes.ok) {
+            const rxData = await rxRes.json().catch(() => ({}))
+            toast(rxData.error || 'Order placed, but the prescription upload failed — please upload it from My Prescriptions', { kind: 'error' })
+          }
+        } catch {
+          toast('Order placed, but the prescription upload failed — please upload it from My Prescriptions', { kind: 'error' })
+        }
+      }
+
       // Online payment: open Razorpay before clearing the cart, so a failed
       // payment doesn't leave the patient with an empty cart.
-      if (payMethod === 'online' && data.order.status !== 'PENDING_RX') {
+      if (payMethod === 'online') {
         const result = await payForOrder({ orderId: data.order.id, address })
         if (!result.ok) {
           toast(
@@ -73,7 +93,12 @@ export default function CheckoutPage() {
       }
 
       clearCart()
-      setOrdered({ number: data.order.number, id: data.order.id, status: data.order.status })
+      setOrdered({
+        number: data.order.number,
+        id: data.order.id,
+        status: data.order.status,
+        paid: payMethod === 'online',
+      })
     } catch {
       toast('Network error — is the dev server and database running?', { kind: 'error' })
     } finally {
@@ -86,9 +111,16 @@ export default function CheckoutPage() {
       <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
         <CheckCircle size={40} className="text-accent" />
       </div>
-      <h1 className="font-display font-bold text-3xl text-fg mb-3">Order Placed!</h1>
+      <h1 className="font-display font-bold text-3xl text-fg mb-3">
+        {ordered.paid ? 'Payment Successful!' : 'Order Placed!'}
+      </h1>
       <p className="text-muted mb-2">Order ID: <strong className="text-fg">{ordered.number}</strong></p>
-      <p className="text-muted mb-6 text-sm">Our pharmacist will review your prescription within 2–4 hours. You&apos;ll receive a WhatsApp confirmation.</p>
+      <p className="text-muted mb-6 text-sm">
+        {ordered.status === 'PENDING_RX'
+          ? 'Our pharmacist will verify your prescription within 2–4 hours, then your order ships.'
+          : 'Your order is confirmed and will be dispatched shortly.'}
+        {!ordered.paid && ' Payment: cash on delivery.'}
+      </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <a href="/account" className={buttonVariants('primary', 'lg')}>Track My Order</a>
         {ordered.status !== 'PENDING_RX' && (
@@ -175,19 +207,61 @@ export default function CheckoutPage() {
               {items.some(i => i.medicine.requiresPrescription) && (
                 <div className="card p-6">
                   <h2 className="font-display font-semibold text-lg text-fg mb-4">Upload Prescription</h2>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 text-center bg-primary-soft/50 hover:bg-primary-soft transition-colors cursor-pointer">
-                    <Upload size={32} className="mx-auto text-primary mb-3" aria-hidden />
-                    <p className="font-semibold text-fg text-sm">Click to upload or drag & drop</p>
-                    <p className="text-xs text-muted mt-1">JPG, PNG or PDF · Max 10MB per file</p>
-                    <Button variant="outline" size="sm" className="mt-4 px-6">Choose File</Button>
+                  <div
+                    className={cn(
+                      'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                      rxFile ? 'border-accent bg-accent/5' : 'border-primary/30 bg-primary-soft/50 hover:bg-primary-soft'
+                    )}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => rxInputRef.current?.click()}
+                    onKeyDown={e => e.key === 'Enter' && rxInputRef.current?.click()}
+                  >
+                    <input
+                      ref={rxInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,application/pdf"
+                      className="hidden"
+                      onChange={e => setRxFile(e.target.files?.[0] ?? null)}
+                    />
+                    {rxFile ? (
+                      <>
+                        <CheckCircle size={32} className="mx-auto text-accent mb-3" aria-hidden />
+                        <p className="font-semibold text-fg text-sm">{rxFile.name}</p>
+                        <p className="text-xs text-muted mt-1">Tap to choose a different file</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={32} className="mx-auto text-primary mb-3" aria-hidden />
+                        <p className="font-semibold text-fg text-sm">Click to upload your prescription</p>
+                        <p className="text-xs text-muted mt-1">JPG, PNG or PDF · Max 10MB</p>
+                        <Button variant="outline" size="sm" className="mt-4 px-6">Choose File</Button>
+                      </>
+                    )}
                   </div>
                   <p className="text-xs text-muted mt-3">
-                    💡 Our licensed pharmacist will verify your prescription within 2–4 hours. You&apos;ll be notified on WhatsApp.
+                    💡 Our licensed pharmacist verifies your prescription within 2–4 hours. You can also upload it
+                    later from <a href="/upload-rx" className="text-primary font-semibold hover:underline">My Prescriptions</a>.
                   </p>
                 </div>
               )}
 
-              <Button size="lg" className="w-full" onClick={() => setStep(2)}>
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  const needsRx = items.some(i => i.medicine.requiresPrescription)
+                  if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
+                    toast('Please complete your delivery details', { kind: 'info' })
+                    return
+                  }
+                  if (needsRx && !rxFile) {
+                    toast('These medicines need a prescription — please upload it to continue', { kind: 'info' })
+                    return
+                  }
+                  setStep(2)
+                }}
+              >
                 Continue to Payment →
               </Button>
             </div>
