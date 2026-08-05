@@ -55,8 +55,16 @@ export async function POST(req: Request) {
   })
 
   if (!res.ok) {
-    console.error('Razorpay order creation failed:', await res.text())
-    return NextResponse.json({ error: 'Could not start payment. Please try again.' }, { status: 502 })
+    const text = await res.text()
+    console.error('Razorpay order creation failed:', res.status, text)
+    let reason = ''
+    try {
+      reason = JSON.parse(text)?.error?.description ?? ''
+    } catch {}
+    return NextResponse.json(
+      { error: reason ? `Razorpay: ${reason}` : 'Could not start payment. Please try again.' },
+      { status: 502 }
+    )
   }
 
   const rzpOrder = await res.json()
